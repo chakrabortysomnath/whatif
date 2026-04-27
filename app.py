@@ -2,8 +2,19 @@ import streamlit as st
 import streamlit.components.v1 as components
 import json
 import pathlib
+import yfinance as yf
 from auth import check_password
 from data import load_state, save_state, reset_state
+
+
+@st.cache_data(ttl=300)
+def fetch_ctsh_price() -> int:
+    try:
+        ticker = yf.Ticker("CTSH")
+        price = ticker.fast_info["last_price"]
+        return max(30, min(90, int(round(price))))
+    except Exception:
+        return 55
 
 st.set_page_config(
     page_title="Portfolio What-If",
@@ -65,6 +76,21 @@ if not html_path.exists():
     st.stop()
 
 html = html_path.read_text(encoding="utf-8")
+
+# ── Inject live CTSH price as default slider value ────────────────────────
+ctsh_live = fetch_ctsh_price()
+html = html.replace(
+    '<input type="range" id="ctsh" min="30" max="90" step="1" value="55">',
+    f'<input type="range" id="ctsh" min="30" max="90" step="1" value="{ctsh_live}">'
+)
+html = html.replace(
+    '<input type="number" id="ctsh-n" value="55" min="30" max="90">',
+    f'<input type="number" id="ctsh-n" value="{ctsh_live}" min="30" max="90">'
+)
+html = html.replace(
+    '<span class="tb-val" id="v-ctsh">$55</span>',
+    f'<span class="tb-val" id="v-ctsh">${ctsh_live}</span>'
+)
 
 # ── Inject saved state + save/restore JS into the HTML ───────────────────
 save_js = f"""

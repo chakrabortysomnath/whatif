@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio What-If Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+[data-theme="light"]{
+  --bg:#f7f6f3;--bg2:#fff;--bg3:#f0ede8;--bg4:#e8e4dd;
+  --border:#e0dbd2;--border2:#ccc7bc;
+  --text:#1a1916;--text2:#4a4740;--text3:#8a8680;
+  --accent:#1a56db;--accent-bg:#eef3fd;--accent-light:#dbe9ff;
+  --green:#166534;--green-bg:#f0fdf4;--green-bdr:#86efac;
+  --red:#991b1b;--red-bg:#fff1f1;--red-bdr:#fca5a5;
+  --amber:#92400e;--amber-bg:#fffbeb;--amber-bdr:#fcd34d;
+  --teal:#0f766e;--teal-bg:#f0fdfa;
+  --hl-low:#fee2e2;--hl-low-t:#991b1b;--hl-hi:#dcfce7;--hl-hi-t:#166534;
+}
+[data-theme="dark"]{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252d40;
+  --border:#2a3347;--border2:#364059;
+  --text:#e8eaf0;--text2:#8f97ad;--text3:#5a6480;
+  --accent:#4f8ef7;--accent-bg:#1a2540;--accent-light:#1e3060;
+  --green:#3ecf8e;--green-bg:#0d2b1e;--green-bdr:#1a7a52;
+  --red:#f56565;--red-bg:#2b1010;--red-bdr:#7a1e1e;
+  --amber:#f6ad55;--amber-bg:#2b1e08;--amber-bdr:#7a4d1e;
+  --teal:#2dd4bf;--teal-bg:#0d2b28;
+  --hl-low:#3d1515;--hl-low-t:#f56565;--hl-hi:#0d2b1e;--hl-hi-t:#3ecf8e;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px}
+.topbar-inner{display:flex;align-items:center;gap:0;height:52px;overflow-x:auto}
+.tb-title{font-family:'Fraunces',serif;font-size:16px;color:var(--text);white-space:nowrap;padding-right:16px;margin-right:8px;border-right:1px solid var(--border)}
+.tb-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;margin:0 10px}
+.tb-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tb-lbl{font-size:10px;color:var(--text3);white-space:nowrap}
+.tb-ctrl{display:flex;align-items:center;gap:4px}
+.tb-ctrl input[type=range]{width:72px;height:3px;-webkit-appearance:none;background:var(--bg4);border-radius:2px;outline:none;cursor:pointer;flex-shrink:0}
+.tb-ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--bg2);cursor:pointer}
+.tb-ctrl input[type=number]{width:58px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:3px 5px;border-radius:4px;text-align:right}
+.tb-ctrl input:focus{outline:none;border-color:var(--accent)}
+.tb-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);font-weight:500;min-width:36px}
+.tog-group{display:flex;gap:4px;flex-shrink:0}
+.tog-chip{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:3px 8px;cursor:pointer;user-select:none;font-size:10px;color:var(--text3);transition:all .15s;white-space:nowrap}
+.tog-chip.on{background:var(--green-bg);border-color:var(--green-bdr);color:var(--green)}
+.tog-chip input{display:none}
+.theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px;color:var(--text2);white-space:nowrap;font-family:'Inter',sans-serif;flex-shrink:0;margin-left:auto}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── LAYOUT ── */
+.page{max-width:1100px;margin:0 auto;padding:0}
+.section{padding:20px 24px;border-bottom:1px solid var(--border)}
+.sec-title{font-family:'Fraunces',serif;font-size:17px;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);background:var(--bg3);padding:2px 6px;border-radius:3px;border:1px solid var(--border)}
+.group-lbl{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin:10px 0 6px}
+.note{font-size:10px;color:var(--text3);margin-top:6px;line-height:1.6}
+
+/* ── CONTEXTUAL CONTROL PANEL ── */
+.ctx-panel{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.ctx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.ctx-item{display:flex;flex-direction:column;gap:3px}
+.ctx-lbl{font-size:10px;color:var(--text3)}
+.ctx-row{display:flex;gap:4px;align-items:center}
+.ctx-row input[type=range]{flex:1;height:3px;-webkit-appearance:none;background:var(--bg4);border-radius:2px;outline:none;cursor:pointer}
+.ctx-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--bg2);cursor:pointer}
+.ctx-row input[type=number]{width:64px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:3px 5px;border-radius:4px;text-align:right}
+.ctx-row input:focus{outline:none;border-color:var(--accent)}
+.ctx-val{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);min-width:40px;font-weight:500}
+
+/* ── ASSET CARDS ── */
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.asset-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px}
+.asset-name{font-size:10px;color:var(--text3);margin-bottom:2px}
+.asset-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text)}
+.asset-sub{font-size:9px;color:var(--text3);margin-top:2px;line-height:1.5}
+
+/* ── EXPENSE TABLES ── */
+.exp-table{width:100%;border-collapse:collapse}
+.exp-table th{font-size:9px;color:var(--text3);font-weight:500;letter-spacing:.04em;text-transform:uppercase;padding:5px 7px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3)}
+.exp-table td{padding:5px 7px;border-bottom:1px solid var(--border);vertical-align:middle}
+.exp-table tr:last-child td{border-bottom:none}
+.exp-table .nc{font-size:12px;color:var(--text2)}
+.exp-table input.amt{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:3px 7px;border-radius:4px;text-align:right;width:110px}
+.exp-table input.amt:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
+.exp-table .tot-row td{background:var(--bg3);color:var(--amber);font-family:'DM Mono',monospace;font-weight:500;font-size:12px;border-top:1px solid var(--border)}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:1px 4px;border-radius:3px;line-height:1}
+.del-btn:hover{color:var(--red)}
+.add-btn{display:flex;align-items:center;gap:5px;background:none;border:1px dashed var(--border2);border-radius:6px;padding:5px 10px;color:var(--text3);font-size:11px;cursor:pointer;width:100%;margin-top:6px;font-family:'Inter',sans-serif}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+
+/* ── YEARLY GBP GRID ── */
+.yr-section{margin-bottom:16px}
+.yr-person-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:8px}
+.yr-wrap{overflow-x:auto}
+.yr-tbl{border-collapse:collapse;width:100%;font-size:11px;min-width:520px}
+.yr-tbl th{background:var(--bg3);color:var(--text3);font-weight:500;padding:6px 8px;border:1px solid var(--border);text-align:center;font-size:10px}
+.yr-tbl th.lh{text-align:left;min-width:130px;font-family:'Inter',sans-serif}
+.yr-tbl th.rate-hdr{background:var(--accent-bg);color:var(--accent);font-size:10px}
+.yr-tbl td{padding:4px 7px;border:1px solid var(--border);background:var(--bg2);text-align:center}
+.yr-tbl td.lh{text-align:left;background:var(--bg3);color:var(--text2);font-size:11px}
+.yr-tbl td.lh.b{font-weight:600;color:var(--text)}
+.yr-tbl td.rate-cell{background:var(--accent-bg)}
+.yr-tbl td input.yr-inp{width:52px;background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:1px 3px;text-align:right;border-radius:3px}
+.yr-tbl td input.yr-inp:focus{outline:none;background:var(--bg2);border:1px solid var(--accent)}
+.yr-tbl td.calc{background:var(--bg3);font-family:'DM Mono',monospace;color:var(--text2);text-align:right;font-size:10px}
+.yr-tbl td.tot{background:var(--amber-bg);font-family:'DM Mono',monospace;font-weight:500;text-align:right;color:var(--amber)}
+.yr-tbl td.inr{background:var(--accent-bg);font-family:'DM Mono',monospace;font-size:10px;text-align:right;color:var(--accent)}
+.yr-tbl td.del-col{background:var(--bg3);width:24px;text-align:center}
+
+/* ── TIMELINE TABLE ── */
+.tl-wrap{overflow-x:auto;margin-top:4px}
+.tl-tbl{border-collapse:collapse;width:100%;font-size:10px;white-space:nowrap;min-width:720px}
+.tl-tbl th{background:var(--bg3);color:var(--text3);font-weight:500;padding:5px 8px;text-align:center;border:1px solid var(--border);font-family:'DM Mono',monospace}
+.tl-tbl th.rh{text-align:left;min-width:165px;font-family:'Inter',sans-serif;font-size:10px}
+.tl-tbl td{padding:4px 8px;border:1px solid var(--border);text-align:right;font-family:'DM Mono',monospace;background:var(--bg2)}
+.tl-tbl td.rh{text-align:left;background:var(--bg3);color:var(--text2);font-family:'Inter',sans-serif;font-size:11px}
+.tl-tbl td.rh.b{font-weight:600;color:var(--text)}
+.tl-tbl tr.inc td{color:var(--green);background:var(--green-bg)}
+.tl-tbl tr.out td{color:var(--red);background:var(--red-bg)}
+.tl-tbl tr.ast td{color:var(--teal);background:var(--teal-bg)}
+.tl-tbl tr.msr-o td{color:var(--amber);background:var(--amber-bg)}
+.tl-tbl tr.msr-i td{color:var(--green);font-weight:500;background:var(--green-bg)}
+.tl-tbl tr.ret td{color:var(--teal);background:var(--teal-bg)}
+.tl-tbl tr.net td{background:var(--bg3);font-weight:500;font-size:11px}
+.tl-tbl tr.bal td{background:var(--accent-bg);font-weight:600;font-size:11px;border-top:2px solid var(--accent-light)}
+.tl-tbl tr.opn td{background:var(--bg3);color:var(--text2)}
+.tl-tbl td.pos{color:var(--green)}.tl-tbl td.neg{color:var(--red)}
+.tl-tbl td.yh{background:var(--accent-bg) !important}
+
+.msr-bar{background:var(--amber-bg);border:1px solid var(--amber-bdr);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--amber);margin-bottom:10px;font-family:'DM Mono',monospace;line-height:1.7}
+.chart-wrap{position:relative;height:200px;margin-bottom:12px}
+/* ── COLLAPSIBLE CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+.card-hdr:hover{background:var(--bg4)}
+.card-title{font-size:12px;font-weight:500;color:var(--text)}
+.card-meta{font-size:10px;color:var(--text3);margin-left:8px}
+.card-arrow{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.card-arrow.open{transform:rotate(90deg)}
+.card-body{padding:12px 14px}
+.card-body.collapsed{display:none}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="tb-title">Portfolio What-If</div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">CTSH</span>
+      <div class="tb-ctrl">
+        <input type="range" id="ctsh" min="30" max="90" step="1" value="55">
+        <input type="number" id="ctsh-n" value="55" min="30" max="90">
+      </div>
+      <span class="tb-val" id="v-ctsh">$55</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">USD/INR</span>
+      <div class="tb-ctrl">
+        <input type="range" id="usdinr" min="75" max="115" step="0.5" value="94.19">
+        <input type="number" id="usdinr-n" value="94.19" step="0.5">
+      </div>
+      <span class="tb-val" id="v-usdinr">94.2</span>
+    </div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">GBP/INR</span>
+      <div class="tb-ctrl">
+        <input type="range" id="gbpinr" min="95" max="145" step="0.5" value="119.44">
+        <input type="number" id="gbpinr-n" value="119.44" step="0.5">
+      </div>
+      <span class="tb-val" id="v-gbpinr">119.4</span>
+    </div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">SGD/INR</span>
+      <div class="tb-ctrl">
+        <input type="range" id="sgdinr" min="58" max="92" step="0.5" value="73.76">
+        <input type="number" id="sgdinr-n" value="73.76" step="0.5">
+      </div>
+      <span class="tb-val" id="v-sgdinr">73.8</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">Return %</span>
+      <div class="tb-ctrl">
+        <input type="range" id="ret" min="0" max="15" step="0.5" value="7">
+        <input type="number" id="ret-n" value="7" step="0.5">
+      </div>
+      <span class="tb-val" id="v-ret">7.0%</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tog-group">
+      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()"> Salary &amp; RSU</label>
+      <span class="tb-lbl" style="margin-left:4px">End MMYY</span>
+      <input type="text" id="empl-end" value="1228" maxlength="4" placeholder="MMYY" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:3px 5px;border-radius:4px;text-align:center" oninput="update()">
+      <label class="tog-chip on" id="chip-fa"><input type="checkbox" id="t-fa" checked onchange="toggleChip('fa')"> Fine Advice</label>
+      <label class="tog-chip on" id="chip-gw"><input type="checkbox" id="t-gw" checked onchange="toggleChip('gw')"> Growealth</label>
+    </div>
+
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">Dark mode</button>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- S1: Assets snapshot -->
+<div class="section" id="s1">
+  <div class="sec-title"><span class="sec-num">01</span> Assets snapshot</div>
+
+  <!-- Card: Asset values & tax -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-assets')">
+      <span class="card-title">Asset values &amp; tax settings</span>
+      <span class="card-arrow open" id="arr-c-assets">▶</span>
+    </div>
+    <div class="card-body" id="c-assets">
+      <div class="ctx-grid">
+        <div class="ctx-item"><span class="ctx-lbl">Fine Advice market value (₹ Cr)</span><div class="ctx-row"><input type="number" id="fa" value="4.2" step="0.1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-fa">₹4.2Cr</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">FA cost of acquisition (₹ Cr)</span><div class="ctx-row"><input type="number" id="facoa" value="1.5" step="0.1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-facoa">₹1.5Cr</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">FA tax rate (%)</span><div class="ctx-row"><input type="number" id="fatax" value="30" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-fatax">30%</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">Growealth market value (₹ L)</span><div class="ctx-row"><input type="number" id="gw" value="45" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gw">₹45L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">GW cost of acquisition (₹ L)</span><div class="ctx-row"><input type="number" id="gwcoa" value="35" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gwcoa">₹35L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">GW tax rate (%)</span><div class="ctx-row"><input type="number" id="gwtax" value="30" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gwtax">30%</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">MSR corpus (SGD)</span><div class="ctx-row"><input type="number" id="msr" value="480000" step="10000" style="width:90px" oninput="update()"><span class="ctx-val" id="v-msr">S$480K</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">SGD equity investments</span><div class="ctx-row"><input type="number" id="eq" value="131000" step="5000" style="width:90px" oninput="update()"><span class="ctx-val" id="v-eq">S$131K</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">SGD cash</span><div class="ctx-row"><input type="number" id="sgdc" value="70000" step="5000" style="width:90px" oninput="update()"><span class="ctx-val" id="v-sgdc">S$70K</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">INR opening cash (₹ L)</span><div class="ctx-row"><input type="number" id="inrc" value="17" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-inrc">₹17L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">INR equity (₹ L)</span><div class="ctx-row"><input type="number" id="inreq" value="14" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-inreq">₹14L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">Property sale value (₹ L)</span><div class="ctx-row"><input type="number" id="propval" value="80" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-propval">₹80L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">Property sale year</span><div class="ctx-row"><input type="number" id="propyr" value="2027" min="2026" max="2035" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-propyr">2027</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">ABSLI maturity value (₹ L)</span><div class="ctx-row"><input type="number" id="absli" value="21" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-absli">₹21L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">ABSLI maturity year</span><div class="ctx-row"><input type="number" id="absliyr" value="2031" min="2026" max="2035" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-absliyr">2031</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">Gratuity + PF (₹ L)</span><div class="ctx-row"><input type="number" id="grat" value="50" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-grat">₹50L</span></div></div>
+        <div class="ctx-item"><span class="ctx-lbl">Gratuity delay (months)</span><div class="ctx-row"><input type="number" id="gratdelay" value="6" min="0" max="24" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gratdelay">6mo</span></div></div>
+      </div>
+      <div class="note" style="margin-top:8px">Tax = (market value − cost of acquisition) × rate. Zero gain = no tax.</div>
+    </div>
+  </div>
+
+  <!-- Card: Asset summary -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-assetsum')">
+      <span class="card-title">Asset summary</span>
+      <span class="card-arrow open" id="arr-c-assetsum">▶</span>
+    </div>
+    <div class="card-body" id="c-assetsum">
+      <div class="asset-grid" id="asset-grid"></div>
+    </div>
+  </div>
+
+  <!-- Card: RSU vesting -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-rsu')">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="card-title">RSU vesting schedule</span>
+        <span class="card-meta">Total: <span id="rsu-total">2,625</span> units · Post-tax: <span id="rsu-inr-val">—</span></span>
+      </div>
+      <span class="card-arrow open" id="arr-c-rsu">▶</span>
+    </div>
+    <div class="card-body" id="c-rsu">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button class="add-btn" style="width:auto;margin:0;padding:4px 10px" onclick="addRSURow()">+ Add tranche</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="exp-table">
+          <thead><tr><th>Vesting date</th><th style="width:100px;text-align:right">Units</th><th style="width:110px;text-align:right">Value (INR)</th><th style="width:24px"></th></tr></thead>
+          <tbody id="rsu-body"></tbody>
+          <tfoot><tr class="tot-row"><td>Total</td><td id="rsu-units-tot" style="text-align:right">—</td><td id="rsu-val-tot" style="text-align:right">—</td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S2: India expenses -->
+<div class="section" id="s2">
+  <div class="sec-title"><span class="sec-num">02</span> India expenses (INR)</div>
+
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-monthly')">
+      <div style="display:flex;align-items:center;gap:8px"><span class="card-title">Monthly recurring</span><span class="card-meta" id="monthly-meta">—</span></div>
+      <span class="card-arrow open" id="arr-c-monthly">▶</span>
+    </div>
+    <div class="card-body" id="c-monthly">
+      <table class="exp-table">
+        <thead><tr><th>Expense</th><th style="width:130px;text-align:right">Monthly (₹)</th><th style="width:24px"></th></tr></thead>
+        <tbody id="monthly-body"></tbody>
+        <tfoot><tr class="tot-row"><td>Total monthly</td><td id="monthly-tot" style="text-align:right">—</td><td></td></tr></tfoot>
+      </table>
+      <button class="add-btn" onclick="addSimple('monthly')">+ Add monthly expense</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-quarterly')">
+      <div style="display:flex;align-items:center;gap:8px"><span class="card-title">Quarterly recurring</span><span class="card-meta" id="quarterly-meta">—</span></div>
+      <span class="card-arrow open" id="arr-c-quarterly">▶</span>
+    </div>
+    <div class="card-body" id="c-quarterly">
+      <table class="exp-table">
+        <thead><tr><th>Expense</th><th style="width:130px;text-align:right">Per quarter (₹)</th><th style="width:24px"></th></tr></thead>
+        <tbody id="quarterly-body"></tbody>
+        <tfoot><tr class="tot-row"><td>Total quarterly</td><td id="quarterly-tot" style="text-align:right">—</td><td></td></tr></tfoot>
+      </table>
+      <button class="add-btn" onclick="addSimple('quarterly')">+ Add quarterly expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- S3: Rai & Neil -->
+<div class="section" id="s3">
+  <div class="sec-title"><span class="sec-num">03</span> Rai (Trisha) &amp; Neil (Ayush) — GBP expenses</div>
+
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-rai')">
+      <div style="display:flex;align-items:center;gap:8px"><span class="card-title">Rai / Trisha</span><span class="card-meta">2026–2028 · GBP rate × months</span></div>
+      <span class="card-arrow open" id="arr-c-rai">▶</span>
+    </div>
+    <div class="card-body" id="c-rai">
+      <div class="yr-wrap"><table class="yr-tbl" id="rai-tbl"></table></div>
+      <button class="add-btn" onclick="addYrRow('rai')">+ Add expense row for Rai</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-neil')">
+      <div style="display:flex;align-items:center;gap:8px"><span class="card-title">Neil / Ayush</span><span class="card-meta">2026–2030 · GBP rate × months</span></div>
+      <span class="card-arrow open" id="arr-c-neil">▶</span>
+    </div>
+    <div class="card-body" id="c-neil">
+      <div class="yr-wrap"><table class="yr-tbl" id="neil-tbl"></table></div>
+      <button class="add-btn" onclick="addYrRow('neil')">+ Add expense row for Neil</button>
+    </div>
+  </div>
+  <div class="note">Blue column = GBP/month rate. Year columns = months active (0–12). Cell = rate × months. INR row converts at current GBP/INR.</div>
+</div>
+
+<!-- S4: MSR -->
+<div class="section" id="s4">
+  <div class="sec-title"><span class="sec-num">04</span> MSR premium timeline</div>
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-msr')">
+      <span class="card-title">MSR premium schedule</span>
+      <span class="card-arrow open" id="arr-c-msr">▶</span>
+    </div>
+    <div class="card-body" id="c-msr">
+      <div class="msr-bar" id="msr-bar">Calculating...</div>
+      <table class="exp-table">
+        <thead><tr><th>Period</th><th style="width:80px;text-align:center">Months</th><th style="text-align:right">SGD/month</th><th style="text-align:right">Total SGD out</th><th style="text-align:right">INR equivalent</th></tr></thead>
+        <tbody>
+          <tr><td class="nc">2026 (partial year)</td><td style="text-align:center"><input class="amt" type="number" id="msr-mo-2026" value="7" min="0" max="12" style="width:54px;text-align:center" oninput="update()"></td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">S$5,000</td><td id="msr-sgd-2026" style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">—</td><td id="m26" style="text-align:right;font-family:'DM Mono',monospace">—</td></tr>
+          <tr><td class="nc">2027</td><td style="text-align:center"><input class="amt" type="number" id="msr-mo-2027" value="12" min="0" max="12" style="width:54px;text-align:center" oninput="update()"></td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">S$5,000</td><td id="msr-sgd-2027" style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">—</td><td id="m27" style="text-align:right;font-family:'DM Mono',monospace">—</td></tr>
+          <tr><td class="nc">2028</td><td style="text-align:center"><input class="amt" type="number" id="msr-mo-2028" value="12" min="0" max="12" style="width:54px;text-align:center" oninput="update()"></td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">S$5,000</td><td id="msr-sgd-2028" style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">—</td><td id="m28" style="text-align:right;font-family:'DM Mono',monospace">—</td></tr>
+          <tr><td class="nc">2029 (partial year)</td><td style="text-align:center"><input class="amt" type="number" id="msr-mo-2029" value="5" min="0" max="12" style="width:54px;text-align:center" oninput="update()"></td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">S$5,000</td><td id="msr-sgd-2029" style="text-align:right;font-family:'DM Mono',monospace;color:var(--amber)">—</td><td id="m29" style="text-align:right;font-family:'DM Mono',monospace">—</td></tr>
+          <tr style="background:var(--green-bg)"><td class="nc" style="color:var(--green);font-weight:600">Jun 2029 — corpus arrives</td><td style="font-family:'DM Mono',monospace;color:var(--green)">—</td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--green)">—</td><td id="mc-sgd" style="text-align:right;font-family:'DM Mono',monospace;color:var(--green)">—</td><td id="mc-inr" style="text-align:right;font-family:'DM Mono',monospace;color:var(--green)">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- S5: Cashflow -->
+<div class="section" id="s5">
+  <div class="sec-title"><span class="sec-num">05</span> Year-by-year cash flow — 2026 to 2035</div>
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-chart')">
+      <span class="card-title">Annual net &amp; closing balance</span>
+      <span class="card-arrow open" id="arr-c-chart">▶</span>
+    </div>
+    <div class="card-body" id="c-chart">
+      <div class="chart-wrap"><canvas id="cfChart" role="img" aria-label="Annual net cash flow and closing balance chart 2026 to 2035">Annual cash flow chart 2026–2035.</canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-tl')">
+      <span class="card-title">Detailed cashflow table</span>
+      <span class="card-arrow open" id="arr-c-tl">▶</span>
+    </div>
+    <div class="card-body" id="c-tl">
+      <div class="tl-wrap"><table class="tl-tbl" id="tl-tbl"></table></div>
+      <div class="note">Opening 2026 = SGD equity + SGD cash (at SGD/INR) + ₹17L. Closing balance carries forward. 7% return applies to INR-denominated balance only (excludes SGD assets). SGD assets yield no return.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+const YEARS=[2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
+const SAL_ANNUAL=4080000;
+
+// Default RSU vesting schedule — 2625 units total
+const DEFAULT_RSU=[
+  {id:1,units:98, date:'Jun 01, 2026'},{id:2,units:125,date:'Jun 01, 2026'},
+  {id:3,units:91, date:'Jun 15, 2026'},{id:4,units:97, date:'Sep 01, 2026'},
+  {id:5,units:125,date:'Sep 01, 2026'},{id:6,units:92, date:'Sep 15, 2026'},
+  {id:7,units:98, date:'Dec 01, 2026'},{id:8,units:125,date:'Dec 01, 2026'},
+  {id:9,units:92, date:'Dec 15, 2026'},{id:10,units:98, date:'Mar 01, 2027'},
+  {id:11,units:125,date:'Mar 01, 2027'},{id:12,units:92, date:'Mar 15, 2027'},
+  {id:13,units:125,date:'Jun 01, 2027'},{id:14,units:91, date:'Jun 15, 2027'},
+  {id:15,units:125,date:'Sep 01, 2027'},{id:16,units:92, date:'Sep 15, 2027'},
+  {id:17,units:125,date:'Dec 01, 2027'},{id:18,units:92, date:'Dec 15, 2027'},
+  {id:19,units:125,date:'Mar 01, 2028'},{id:20,units:92, date:'Mar 15, 2028'},
+  {id:21,units:125,date:'Jun 01, 2028'},{id:22,units:125,date:'Sep 01, 2028'},
+  {id:23,units:125,date:'Dec 01, 2028'},{id:24,units:125,date:'Mar 01, 2029'},
+];
+let rsuSchedule=DEFAULT_RSU.map(r=>({...r}));
+let rsuNextId=100;
+
+function rsuByYear(){
+  const m={};
+  rsuSchedule.forEach(r=>{
+    const yr=parseInt(r.date.slice(-4));
+    m[yr]=(m[yr]||0)+r.units;
+  });
+  return m;
+}
+function totalRSUUnits(){return rsuSchedule.reduce((s,r)=>s+r.units,0);}
+const RAI_YRS=[2026,2027,2028];
+const NEIL_YRS=[2026,2027,2028,2029,2030];
+
+// Rai rows: {id, name, rate (GBP/mo), months: {yr: n}}
+let raiRows=[
+  {id:1,name:'Rent',rate:1800,mo:{2026:7,2027:12,2028:6}},
+  {id:2,name:'Living expenses',rate:1500,mo:{2026:7,2027:12,2028:6}},
+  {id:3,name:'Travel',rate:500,mo:{2026:7,2027:12,2028:6}},
+  {id:4,name:'Tuition Fees',rate:2000,mo:{2026:0,2027:12,2028:6}},
+];
+let neilRows=[
+  {id:10,name:'Rent',rate:1800,mo:{2026:7,2027:12,2028:12,2029:12,2030:6}},
+  {id:11,name:'Living expenses',rate:1500,mo:{2026:7,2027:12,2028:12,2029:12,2030:6}},
+  {id:12,name:'Travel',rate:500,mo:{2026:7,2027:12,2028:12,2029:12,2030:6}},
+  {id:13,name:'Tuition Fees',rate:2500,mo:{2026:6,2027:12,2028:12,2029:12,2030:6}},
+];
+
+let monthlyExp=[
+  {id:50,name:'Baba & Ma',val:50000},{id:51,name:'3 Salaries',val:60000},
+  {id:52,name:'Medicine',val:15000},{id:53,name:'Travel & Conveyance',val:20000},
+  {id:54,name:'Maintenance',val:20000},{id:55,name:'Utilities',val:15000},
+  {id:56,name:'Food & Beverages',val:80000},{id:57,name:'Car Loan EMI',val:33000},
+  {id:58,name:'Personal expenses',val:30000},
+];
+let quarterlyExp=[{id:101,name:'Tukun',val:50000},{id:102,name:'Misc Travel',val:200000}];
+let nxtId=300;
+
+const g=id=>document.getElementById(id);
+const fI=v=>{const a=Math.abs(v);let s=a>=1e7?'₹'+(a/1e7).toFixed(2)+'Cr':a>=1e5?'₹'+(a/1e5).toFixed(1)+'L':'₹'+Math.round(a).toLocaleString('en-IN');return v<0?'('+s+')':s};
+const fCr=v=>(v/1e7).toFixed(2)+'Cr';
+const fS=v=>{const a=Math.abs(v);const s='S$'+(a>=1000?(a/1000).toFixed(0)+'K':Math.round(a));return v<0?'('+s+')':s};
+const fG=v=>'£'+Math.round(v).toLocaleString();
+
+function getP(){
+  // Parse employment end MMYY → {endMo, endYr} e.g. "1228" → Dec 2028
+  const emplOn=g('chip-empl')&&g('chip-empl').classList.contains('on');
+  const raw=(g('empl-end')?g('empl-end').value:'1228').padStart(4,'0');
+  const emplEndMo=Math.min(12,Math.max(1,parseInt(raw.slice(0,2))||12));
+  const emplEndYr=parseInt('20'+raw.slice(2))||2028;
+  return{
+    ctsh:+g('ctsh').value,
+    fa:(+g('fa').value||0)*1e7, facoa:(+g('facoa').value||0)*1e7, fatax:(+g('fatax').value||0)/100,
+    gw:(+g('gw').value||0)*1e5, gwcoa:(+g('gwcoa').value||0)*1e5, gwtax:(+g('gwtax').value||0)/100,
+    msrMo:{
+      2026:+(g('msr-mo-2026')?g('msr-mo-2026').value:7),
+      2027:+(g('msr-mo-2027')?g('msr-mo-2027').value:12),
+      2028:+(g('msr-mo-2028')?g('msr-mo-2028').value:12),
+      2029:+(g('msr-mo-2029')?g('msr-mo-2029').value:5),
+    },
+    msr:+(g('msr')?g('msr').value:480000)||480000,
+    eq:+(g('eq')?g('eq').value:131000)||131000,
+    sgdc:+(g('sgdc')?g('sgdc').value:70000)||70000,
+    inrc:(+g('inrc').value||0)*1e5,
+    inreq:(+g('inreq').value||0)*1e5,
+    propval:(+g('propval').value||80)*1e5,
+    propyr:+g('propyr').value||2027,
+    absli:(+g('absli').value||21)*1e5,
+    absliyr:+g('absliyr').value||2031,
+    grat:(+g('grat').value||50)*1e5,
+    gratdelay:+g('gratdelay').value||6,
+    ret:+g('ret').value/100,
+    usdinr:+g('usdinr').value, gbpinr:+g('gbpinr').value, sgdinr:+g('sgdinr').value,
+    emplOn, emplEndMo, emplEndYr,
+    tFa:g('t-fa').checked?1:0, tGw:g('t-gw').checked?1:0,
+  };
+}
+
+function netTax(mv,coa,rate){const gain=Math.max(0,mv-coa);return mv-gain*rate;}
+function totM(){return monthlyExp.reduce((s,e)=>s+e.val,0)}
+function totQ(){return quarterlyExp.reduce((s,e)=>s+e.val,0)}
+function rowAnnualGBP(row,yr){return row.rate*(row.mo[yr]||0);}
+function personYrGBP(rows,yr){return rows.reduce((s,r)=>s+rowAnnualGBP(r,yr),0);}
+
+// How many months of salary/RSU in a given year based on end date
+function emplMonthsInYear(yr, p){
+  if(!p.emplOn) return 0;
+  if(yr < p.emplEndYr) return 12;
+  if(yr === p.emplEndYr) return p.emplEndMo; // full months up to and including end month
+  return 0;
+}
+// RSU vesting: only count tranches that vest on/before end date
+function rsuInYear(yr, p){
+  if(!p.emplOn) return 0;
+  const rsuMap=rsuByYear();
+  // Filter by end date: only include if year < endYr, or year == endYr and month <= endMo
+  let total=0;
+  rsuSchedule.forEach(r=>{
+    const ry=parseInt(r.date.slice(-4));
+    const raw=r.date.split(' ');
+    const MONTHS={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+    const rm=MONTHS[raw[0]]||1;
+    if(ry===yr){
+      if(ry<p.emplEndYr||(ry===p.emplEndYr&&rm<=p.emplEndMo)){
+        total+=r.units;
+      }
+    }
+  });
+  return total;
+}
+// Gratuity year = salary end year + delay months (rounded to year)
+function gratYear(p){
+  const totalMo=p.emplEndYr*12+p.emplEndMo+p.gratdelay;
+  return Math.floor(totalMo/12);
+}
+
+function totalAssets(p){
+  const rsu=totalRSUUnits()*p.ctsh*0.85*p.usdinr*(p.emplOn?1:0);
+  const faN=netTax(p.fa,p.facoa,p.fatax)*p.tFa;
+  const gwN=netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw;
+  const sgd=(p.msr+p.eq+p.sgdc)*p.sgdinr;
+  const inrAssets=faN+gwN+p.propval+p.absli+p.grat+p.inrc+p.inreq;
+  return{rsu,faN,gwN,sgd,total:rsu+inrAssets+sgd};
+}
+
+function buildYears(p){
+  // Opening INR balance = INR cash + INR equity (both earn return from day 1)
+  let inrBal=p.inrc+p.inreq;
+  const rsuYrMap=rsuByYear();
+  const gyr=gratYear(p);
+  return YEARS.map(yr=>{
+    const open=inrBal;
+    // Return on INR balance (includes FA+GW after 2026, property after sale yr, etc.)
+    const ret=open>0?open*p.ret:0;
+    // Salary: monthly salary × months active this year
+    const salMo=emplMonthsInYear(yr,p);
+    const sal=(SAL_ANNUAL/12)*salMo;
+    // RSU: units vesting this year (filtered by end date) × price
+    const rsuUnits=rsuInYear(yr,p);
+    const rsu=rsuUnits*p.ctsh*0.85*p.usdinr;
+    // One-time inflows
+    const faI=yr===2026?netTax(p.fa,p.facoa,p.fatax)*p.tFa:0;
+    const gwI=yr===2026?netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw:0;
+    const prop=yr===p.propyr?p.propval:0;
+    const absliI=yr===p.absliyr?p.absli:0;
+    const gratI=yr===gyr?p.grat:0;
+    const sgdLiq=yr===2026?(p.eq+p.sgdc)*p.sgdinr:0;
+    const msrI=yr===2029?p.msr*p.sgdinr:0;
+    // MSR premium out
+    const msrMo=p.msrMo[yr]||0;
+    const msrO=msrMo*5000*p.sgdinr;
+    // Expenses
+    const india=totM()*12+totQ()*4;
+    const rai=personYrGBP(raiRows,yr)*p.gbpinr;
+    const neil=personYrGBP(neilRows,yr)*p.gbpinr;
+    const totalIn=sal+rsu+faI+gwI+prop+absliI+gratI+sgdLiq+msrI+ret;
+    const totalOut=msrO+india+rai+neil;
+    const net=totalIn-totalOut;
+    const close=open+net;
+    inrBal=close;
+    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,net,close};
+  });
+}
+
+// ── Render simple expense table
+function renderSimple(tbodyId,data,type){
+  const tb=g(tbodyId);if(!tb)return;tb.innerHTML='';
+  data.forEach(e=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="nc">${e.name}</td><td style="text-align:right"><input class="amt" type="number" value="${e.val}" onchange="updSimple('${type}',${e.id},this.value)"></td><td><button class="del-btn" onclick="delSimple('${type}',${e.id})">&times;</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function updSimple(type,id,val){
+  const arr=type==='monthly'?monthlyExp:quarterlyExp;
+  const e=arr.find(x=>x.id===id);if(e)e.val=Math.max(0,+val);update();
+}
+function delSimple(type,id){
+  if(type==='monthly')monthlyExp=monthlyExp.filter(x=>x.id!==id);
+  else quarterlyExp=quarterlyExp.filter(x=>x.id!==id);
+  renderSimple(type==='monthly'?'monthly-body':'quarterly-body',type==='monthly'?monthlyExp:quarterlyExp,type);update();
+}
+function addSimple(type){
+  const name=prompt('Expense name:');if(!name)return;
+  const val=+prompt('Amount:');if(isNaN(val))return;
+  const arr=type==='monthly'?monthlyExp:quarterlyExp;
+  arr.push({id:nxtId++,name,val:Math.max(0,val)});
+  renderSimple(type==='monthly'?'monthly-body':'quarterly-body',arr,type);update();
+}
+
+// ── Render yearly GBP grid (rate × months model)
+function renderYrTbl(tblId,rows,yrCols,person){
+  const tbl=g(tblId);if(!tbl)return;
+  const p=getP();
+  let html=`<thead><tr>
+    <th class="lh">Expense</th>
+    <th class="rate-hdr">GBP/month</th>
+    ${yrCols.map(y=>`<th>${y}<br><span style="font-size:9px;font-weight:400">months</span></th>`).join('')}
+    <th>Total GBP</th>
+    <th style="width:24px"></th>
+  </tr></thead><tbody>`;
+
+  rows.forEach(r=>{
+    const totGBP=yrCols.reduce((s,y)=>s+rowAnnualGBP(r,y),0);
+    html+=`<tr>
+      <td class="lh">${r.name}</td>
+      <td class="rate-cell" style="text-align:right"><input class="yr-inp" type="number" value="${r.rate}" onchange="updYrRate('${person}',${r.id},this.value)" style="width:60px"></td>
+      ${yrCols.map(y=>`<td style="text-align:right"><input class="yr-inp" type="number" value="${r.mo[y]??0}" min="0" max="12" onchange="updYrMo('${person}',${r.id},${y},this.value)"></td>`).join('')}
+      <td class="tot">${fG(totGBP)}</td>
+      <td class="del-col"><button class="del-btn" onclick="delYrRow('${person}',${r.id})">&times;</button></td>
+    </tr>`;
+  });
+
+  // Total row GBP
+  html+=`<tr>
+    <td class="lh b">Total GBP / year</td>
+    <td class="calc">—</td>
+    ${yrCols.map(y=>`<td class="calc">${fG(rows.reduce((s,r)=>s+rowAnnualGBP(r,y),0))}</td>`).join('')}
+    <td class="tot">${fG(rows.reduce((s,r)=>yrCols.reduce((ss,y)=>ss+rowAnnualGBP(r,y),s),0))}</td>
+    <td class="del-col"></td>
+  </tr>`;
+
+  // INR row
+  html+=`<tr>
+    <td class="lh" style="color:var(--accent)">INR equiv. / year</td>
+    <td class="inr">—</td>
+    ${yrCols.map(y=>`<td class="inr">${fI(rows.reduce((s,r)=>s+rowAnnualGBP(r,y),0)*p.gbpinr)}</td>`).join('')}
+    <td class="inr">—</td>
+    <td class="del-col"></td>
+  </tr>`;
+
+  html+=`</tbody>`;
+  tbl.innerHTML=html;
+}
+
+function updYrRate(person,id,val){
+  const rows=person==='rai'?raiRows:neilRows;
+  const r=rows.find(x=>x.id===id);if(r)r.rate=Math.max(0,+val);
+  renderYrTbl(person+'-tbl',rows,person==='rai'?RAI_YRS:NEIL_YRS,person);update();
+}
+function updYrMo(person,id,yr,val){
+  const rows=person==='rai'?raiRows:neilRows;
+  const r=rows.find(x=>x.id===id);if(r)r.mo[yr]=Math.min(12,Math.max(0,+val));
+  renderYrTbl(person+'-tbl',rows,person==='rai'?RAI_YRS:NEIL_YRS,person);update();
+}
+function delYrRow(person,id){
+  if(person==='rai')raiRows=raiRows.filter(x=>x.id!==id);
+  else neilRows=neilRows.filter(x=>x.id!==id);
+  renderYrTbl(person+'-tbl',person==='rai'?raiRows:neilRows,person==='rai'?RAI_YRS:NEIL_YRS,person);update();
+}
+function addYrRow(person){
+  const name=prompt('Expense name:');if(!name)return;
+  const rate=+prompt('Monthly rate (GBP):');if(isNaN(rate))return;
+  const yrs=person==='rai'?RAI_YRS:NEIL_YRS;
+  const mo={};yrs.forEach(y=>mo[y]=0);
+  const rows=person==='rai'?raiRows:neilRows;
+  rows.push({id:nxtId++,name,rate:Math.max(0,rate),mo});
+  renderYrTbl(person+'-tbl',rows,yrs,person);update();
+}
+
+function renderRSUTable(p){
+  const tb=g('rsu-body');if(!tb)return;
+  const pp=p||getP();
+  tb.innerHTML='';
+  rsuSchedule.forEach(r=>{
+    const val=r.units*pp.ctsh*0.85*pp.usdinr;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="amt" type="text" value="${r.date}" style="width:130px;text-align:left" onchange="updRSU(${r.id},'date',this.value)"></td><td style="text-align:right"><input class="amt" type="number" value="${r.units}" style="width:80px" onchange="updRSU(${r.id},'units',this.value)"></td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${fI(val)}</td><td><button class="del-btn" onclick="delRSU(${r.id})">&times;</button></td>`;
+    tb.appendChild(tr);
+  });
+  const totUnits=totalRSUUnits();
+  const totVal=totUnits*pp.ctsh*0.85*pp.usdinr;
+  g('rsu-units-tot').textContent=totUnits.toLocaleString();
+  g('rsu-val-tot').textContent=fI(totVal);
+  g('rsu-total').textContent=totUnits.toLocaleString();
+  if(g('rsu-ctsh-val'))g('rsu-ctsh-val').textContent=pp.ctsh;
+  g('rsu-inr-val').textContent=fI(totVal);
+}
+function updRSU(id,field,val){
+  const r=rsuSchedule.find(x=>x.id===id);
+  if(!r)return;
+  if(field==='units')r.units=Math.max(0,+val);
+  else r.date=val;
+  const p=getP();renderRSUTable(p);update();
+}
+function delRSU(id){
+  rsuSchedule=rsuSchedule.filter(x=>x.id!==id);
+  const p=getP();renderRSUTable(p);update();
+}
+function addRSURow(){
+  const date=prompt('Vesting date (e.g. Jun 01, 2027):');if(!date)return;
+  const units=+prompt('Units:');if(isNaN(units)||units<=0)return;
+  rsuSchedule.push({id:rsuNextId++,units,date});
+  rsuSchedule.sort((a,b)=>{
+    const parse=d=>{const m={'Jan':0,'Feb':1,'Mar':2,'Apr':3,'May':4,'Jun':5,'Jul':6,'Aug':7,'Sep':8,'Oct':9,'Nov':10,'Dec':11};const p=d.split(' ');return new Date(+p[2],m[p[0]],+p[1]);};
+    return parse(a.date)-parse(b.date);
+  });
+  const p=getP();renderRSUTable(p);update();
+}
+
+function toggleCard(id){
+  const body=g(id);
+  const arr=g('arr-'+id);
+  if(!body||!arr)return;
+  const collapsed=body.classList.toggle('collapsed');
+  arr.classList.toggle('open',!collapsed);
+}
+
+function renderAllTables(){
+  renderSimple('monthly-body',monthlyExp,'monthly');
+  renderSimple('quarterly-body',quarterlyExp,'quarterly');
+  renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
+  renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
+  renderRSUTable();
+}
+
+function toggleEmpl(){
+  const chip=g('chip-empl');
+  chip.classList.toggle('on');
+  update();
+}
+
+function toggleChip(key){
+  const chip=g('chip-'+key);
+  const chk=g('t-'+key);
+  chip.classList.toggle('on',chk.checked);
+  update();
+}
+
+let cfChart=null;
+
+function update(){
+  const p=getP();
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+
+  // Top bar labels
+  const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
+  st('v-ctsh','$'+p.ctsh);
+  st('v-usdinr',p.usdinr.toFixed(1));
+  st('v-gbpinr',p.gbpinr.toFixed(1));
+  st('v-sgdinr',p.sgdinr.toFixed(1));
+  st('v-ret',(p.ret*100).toFixed(1)+'%');
+
+  // Context panel labels
+  st('v-fa','₹'+(p.fa/1e7).toFixed(1)+'Cr');
+  st('v-facoa','₹'+(p.facoa/1e7).toFixed(1)+'Cr');
+  st('v-fatax',Math.round(p.fatax*100)+'%');
+  st('v-gw','₹'+(p.gw/1e5).toFixed(0)+'L');
+  st('v-gwcoa','₹'+(p.gwcoa/1e5).toFixed(0)+'L');
+  st('v-gwtax',Math.round(p.gwtax*100)+'%');
+  st('v-msr','S$'+(p.msr/1000).toFixed(0)+'K');
+  st('v-eq','S$'+(p.eq/1000).toFixed(0)+'K');
+  st('v-sgdc','S$'+(p.sgdc/1000).toFixed(0)+'K');
+  st('v-inrc','₹'+(p.inrc/1e5).toFixed(0)+'L');
+  st('v-inreq','₹'+(p.inreq/1e5).toFixed(0)+'L');
+  st('v-propval','₹'+(p.propval/1e5).toFixed(0)+'L');
+  st('v-propyr',p.propyr);
+  st('v-absli','₹'+(p.absli/1e5).toFixed(0)+'L');
+  st('v-absliyr',p.absliyr);
+  st('v-grat','₹'+(p.grat/1e5).toFixed(0)+'L');
+  st('v-gratdelay',p.gratdelay+'mo');
+
+  st('monthly-tot','₹'+totM().toLocaleString('en-IN'));
+  st('quarterly-tot','₹'+totQ().toLocaleString('en-IN'));
+  if(g('monthly-meta'))g('monthly-meta').textContent='₹'+(totM()/1e3).toFixed(0)+'K/mo total';
+  if(g('quarterly-meta'))g('quarterly-meta').textContent='₹'+(totQ()/1e3).toFixed(0)+'K/qtr total';
+
+  const a=totalAssets(p);
+  const ydata=buildYears(p);
+
+  // Asset grid
+  const gyr=gratYear(p);
+  const faGain=Math.max(0,p.fa-p.facoa),faTax=faGain*p.fatax,faNet=p.fa-faTax;
+  const gwGain=Math.max(0,p.gw-p.gwcoa),gwTax=gwGain*p.gwtax,gwNet=p.gw-gwTax;
+  const emplLabel=p.emplOn?`Active until ${String(p.emplEndMo).padStart(2,'0')}/${p.emplEndYr}`:'OFF';
+  const items=[
+    {name:'RSU ('+totalRSUUnits().toLocaleString()+' units)',val:fI(a.rsu),sub:`$${p.ctsh} × ₹${p.usdinr.toFixed(0)} · post 15% tax · ${emplLabel}`,dim:!p.emplOn},
+    {name:'Salary',val:p.emplOn?fI(SAL_ANNUAL/12*emplMonthsInYear(p.emplEndYr,p)+SAL_ANNUAL*(p.emplEndYr-2026)):'OFF',sub:emplLabel,dim:!p.emplOn},
+    {name:'Fine Advice',val:fI(faNet*p.tFa),sub:`MV ₹${(p.fa/1e7).toFixed(1)}Cr − COA ₹${(p.facoa/1e7).toFixed(1)}Cr → tax ₹${(faTax/1e7).toFixed(2)}Cr`,dim:!p.tFa},
+    {name:'Growealth',val:fI(gwNet*p.tGw),sub:`MV ₹${(p.gw/1e5).toFixed(0)}L − COA ₹${(p.gwcoa/1e5).toFixed(0)}L → tax ₹${(gwTax/1e5).toFixed(1)}L`,dim:!p.tGw},
+    {name:'Property LK-866',val:fI(p.propval),sub:`Sale in ${p.propyr} · post-tax`},
+    {name:'ABSLI',val:fI(p.absli),sub:`Maturity ${p.absliyr}`},
+    {name:'Gratuity + PF',val:fI(p.grat),sub:`Available ${gyr} (${p.gratdelay}mo after salary end)`},
+    {name:'INR equity',val:fI(p.inreq),sub:'₹14L · earns '+Math.round(p.ret*100)+'% return'},
+    {name:'INR opening cash',val:fI(p.inrc),sub:'₹17L · earns '+Math.round(p.ret*100)+'% return'},
+    {name:'MSR corpus',val:fI(p.msr*p.sgdinr),sub:`S$${(p.msr/1000).toFixed(0)}K × ₹${p.sgdinr.toFixed(2)}`},
+    {name:'SGD equity',val:fI(p.eq*p.sgdinr),sub:`S$${(p.eq/1000).toFixed(0)}K × ₹${p.sgdinr.toFixed(2)}`},
+    {name:'SGD cash',val:fI(p.sgdc*p.sgdinr),sub:`S$${(p.sgdc/1000).toFixed(0)}K × ₹${p.sgdinr.toFixed(2)}`},
+  ];
+  g('asset-grid').innerHTML=items.map(it=>`<div class="asset-card" style="${it.dim?'opacity:.35':''}"><div class="asset-name">${it.name}</div><div class="asset-val">${it.val}</div><div class="asset-sub">${it.sub||''}</div></div>`).join('');
+
+  // Re-render GBP grids (INR row depends on gbpinr)
+  renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
+  renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
+  renderRSUTable(p);
+
+  // MSR section
+  const mT=totM(),qT=totQ();
+  const msrAnnSGD=(mT*12+qT*4)/p.sgdinr;
+  let msrBal=p.msr,msrYr=2029;
+  while(msrBal>0&&msrYr<=2060){msrBal-=msrAnnSGD;if(msrBal<=0)break;msrYr++;}
+  const msrUntil=msrYr>2060?'2060+':msrYr;
+  const mo26=p.msrMo[2026]||0,mo27=p.msrMo[2027]||0,mo28=p.msrMo[2028]||0,mo29=p.msrMo[2029]||0;
+  st('msr-bar',`MSR: S$5K/mo × ${mo26} months 2026 → ${mo27} months 2027 → ${mo28} months 2028 → ${mo29} months 2029 → S$${(p.msr/1000).toFixed(0)}K corpus Jun 2029 → drawn at ~S$${Math.round(msrAnnSGD/1000)}K/yr → corpus lasts until approx. ${msrUntil}`);
+  if(g('msr-sgd-2026')) g('msr-sgd-2026').textContent='(S$'+Math.round(mo26*5000).toLocaleString()+')';
+  if(g('msr-sgd-2027')) g('msr-sgd-2027').textContent='(S$'+Math.round(mo27*5000).toLocaleString()+')';
+  if(g('msr-sgd-2028')) g('msr-sgd-2028').textContent='(S$'+Math.round(mo28*5000).toLocaleString()+')';
+  if(g('msr-sgd-2029')) g('msr-sgd-2029').textContent='(S$'+Math.round(mo29*5000).toLocaleString()+')';
+  st('m26','('+fI(mo26*5000*p.sgdinr)+')');
+  st('m27','('+fI(mo27*5000*p.sgdinr)+')');
+  st('m28','('+fI(mo28*5000*p.sgdinr)+')');
+  st('m29','('+fI(mo29*5000*p.sgdinr)+')');
+  st('mc-sgd',fS(p.msr));
+  st('mc-inr',fI(p.msr*p.sgdinr));
+
+  // Chart
+  const netV=ydata.map(d=>Math.round(d.net/1e5)/10);
+  const clV=ydata.map(d=>Math.round(d.close/1e5)/10);
+  const bCol=netV.map(v=>v>=0?(isDark?'rgba(62,207,142,.55)':'rgba(22,101,52,.5)'):(isDark?'rgba(245,101,101,.55)':'rgba(153,27,27,.5)'));
+  const lCol=isDark?'#4f8ef7':'#1a56db';
+  const tickCol=isDark?'#5a6480':'#8a8680';
+  const gridCol=isDark?'rgba(255,255,255,.05)':'rgba(0,0,0,.05)';
+  if(cfChart){
+    cfChart.data.datasets[0].data=netV;cfChart.data.datasets[0].backgroundColor=bCol;
+    cfChart.data.datasets[1].data=clV;cfChart.data.datasets[1].borderColor=lCol;cfChart.data.datasets[1].pointBackgroundColor=lCol;
+    cfChart.options.scales.x.ticks.color=tickCol;cfChart.options.scales.y.ticks.color=tickCol;
+    cfChart.options.scales.x.grid.color=gridCol;cfChart.options.scales.y.grid.color=gridCol;
+    cfChart.options.plugins.legend.labels.color=tickCol;
+    cfChart.update('none');
+  } else {
+    cfChart=new Chart(g('cfChart'),{
+      type:'bar',
+      data:{labels:YEARS.map(String),datasets:[
+        {label:'Annual net (₹L)',data:netV,backgroundColor:bCol,borderWidth:0,borderRadius:3,order:2},
+        {label:'Closing balance (₹L)',data:clV,type:'line',borderColor:lCol,backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:lCol,order:1}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{font:{size:11,family:"'Inter'"},boxWidth:12,padding:12,color:tickCol}},
+          tooltip:{callbacks:{label:c=>c.dataset.label+': ₹'+c.parsed.y.toFixed(1)+'L'}}},
+        scales:{
+          x:{grid:{color:gridCol},ticks:{color:tickCol,font:{size:11,family:"'DM Mono'"}}},
+          y:{grid:{color:gridCol},ticks:{color:tickCol,font:{size:10,family:"'DM Mono'"},callback:v=>'₹'+v+'L'}}
+        }
+      }
+    });
+  }
+
+  // Timeline
+  const tRows=[
+    {l:'Opening balance',cls:'opn',b:true,v:ydata.map(d=>`<span class="${d.open>=0?'pos':'neg'}">${fI(d.open)}</span>`)},
+    {l:'Salary (INR)',cls:'inc',v:ydata.map(d=>d.sal>0?fI(d.sal):'—')},
+    {l:'RSU vesting (INR)',cls:'inc',v:ydata.map(d=>d.rsu>0?fI(d.rsu):'—')},
+    {l:'Fine Advice net',cls:'ast',v:ydata.map(d=>d.faI>0?fI(d.faI):'—')},
+    {l:'Growealth net',cls:'ast',v:ydata.map(d=>d.gwI>0?fI(d.gwI):'—')},
+    {l:'Property LK-866',cls:'ast',v:ydata.map(d=>d.prop>0?fI(d.prop):'—')},
+    {l:'ABSLI maturity',cls:'ast',v:ydata.map(d=>d.absliI>0?fI(d.absliI):'—')},
+    {l:'Gratuity + PF',cls:'ast',v:ydata.map(d=>d.gratI>0?fI(d.gratI):'—')},
+    {l:'SGD equity + cash (2026)',cls:'ast',v:ydata.map(d=>d.sgdLiq>0?fI(d.sgdLiq):'—')},
+    {l:'MSR corpus arrives',cls:'msr-i',v:ydata.map(d=>d.msrI>0?fI(d.msrI):'—')},
+    {l:`Return on INR balance (${(p.ret*100).toFixed(1)}%)`,cls:'ret',v:ydata.map(d=>d.ret>0?fI(d.ret):'—')},
+    {l:'MSR premium out',cls:'msr-o',v:ydata.map(d=>d.msrO>0?'('+fI(d.msrO)+')':'—')},
+    {l:'India expenses',cls:'out',v:ydata.map(d=>'('+fI(d.india)+')')},
+    {l:'Rai / Trisha (GBP→INR)',cls:'out',v:ydata.map(d=>d.rai>0?'('+fI(d.rai)+')':'—')},
+    {l:'Neil / Ayush (GBP→INR)',cls:'out',v:ydata.map(d=>d.neil>0?'('+fI(d.neil)+')':'—')},
+    {l:'Net cash flow',cls:'net',v:ydata.map(d=>`<span class="${d.net>=0?'pos':'neg'}">${d.net<0?'('+fI(Math.abs(d.net))+')':fI(d.net)}</span>`)},
+    {l:'Closing balance',cls:'bal',b:true,v:ydata.map(d=>`<span class="${d.close>=0?'pos':'neg'}">${d.close<0?'('+fI(Math.abs(d.close))+')':fI(d.close)}</span>`)},
+  ];
+  g('tl-tbl').innerHTML=
+    `<tr><th class="rh">Line item</th>${YEARS.map((y,i)=>`<th class="${i===0?'yh':''}">${y}</th>`).join('')}</tr>`
+    +tRows.map(r=>`<tr class="${r.cls}"><td class="rh${r.b?' b':''}">${r.l}</td>${r.v.map((v,i)=>`<td class="${i===0?'yh':''}">${v}</td>`).join('')}</tr>`).join('');
+}
+
+function toggleTheme(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
+  g('theme-btn').textContent=dark?'Dark mode':'Light mode';
+  if(cfChart){cfChart.destroy();cfChart=null;}
+  update();
+}
+
+function syncPair(sId,nId){
+  const sl=g(sId),inp=g(nId);
+  sl.addEventListener('input',()=>{inp.value=sl.value;update()});
+  inp.addEventListener('input',()=>{sl.value=inp.value;update()});
+}
+['ctsh','usdinr','gbpinr','sgdinr','ret'].forEach(id=>syncPair(id,id+'-n'));
+
+renderAllTables();
+update();
+</script>
+</body>
+</html>

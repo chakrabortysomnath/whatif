@@ -23,7 +23,7 @@ def fetch_ctsh_price() -> int:
             return max(30, min(90, int(round(hist["Close"].iloc[-1]))))
     except Exception:
         pass
-    return 55
+    return 54
 
 st.set_page_config(
     page_title="Portfolio What-If",
@@ -89,15 +89,15 @@ html = html_path.read_text(encoding="utf-8")
 # ── Inject live CTSH price as default slider value ────────────────────────
 ctsh_live = fetch_ctsh_price()
 html = html.replace(
-    '<input type="range" id="ctsh" min="30" max="90" step="1" value="55">',
+    '<input type="range" id="ctsh" min="30" max="90" step="1" value="54">',
     f'<input type="range" id="ctsh" min="30" max="90" step="1" value="{ctsh_live}">'
 )
 html = html.replace(
-    '<input type="number" id="ctsh-n" value="55" min="30" max="90">',
+    '<input type="number" id="ctsh-n" value="54" min="30" max="90">',
     f'<input type="number" id="ctsh-n" value="{ctsh_live}" min="30" max="90">'
 )
 html = html.replace(
-    '<span class="tb-val" id="v-ctsh">$55</span>',
+    '<span class="tb-val" id="v-ctsh">$54</span>',
     f'<span class="tb-val" id="v-ctsh">${ctsh_live}</span>'
 )
 

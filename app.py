@@ -11,10 +11,19 @@ from data import load_state, save_state, reset_state
 def fetch_ctsh_price() -> int:
     try:
         ticker = yf.Ticker("CTSH")
-        price = ticker.fast_info["last_price"]
-        return max(30, min(90, int(round(price))))
+        # fast_info is an object in yfinance>=0.2, not a dict
+        price = ticker.fast_info.last_price
+        if price and price > 0:
+            return max(30, min(90, int(round(price))))
     except Exception:
-        return 55
+        pass
+    try:
+        hist = yf.Ticker("CTSH").history(period="1d")
+        if not hist.empty:
+            return max(30, min(90, int(round(hist["Close"].iloc[-1]))))
+    except Exception:
+        pass
+    return 55
 
 st.set_page_config(
     page_title="Portfolio What-If",

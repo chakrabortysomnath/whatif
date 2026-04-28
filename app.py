@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import json
 import pathlib
-import yfinance as yf
+import requests
 from auth import check_password
 from data import load_state, save_state, reset_state
 
@@ -10,17 +10,13 @@ from data import load_state, save_state, reset_state
 @st.cache_data(ttl=300)
 def fetch_ctsh_price() -> int:
     try:
-        ticker = yf.Ticker("CTSH")
-        # fast_info is an object in yfinance>=0.2, not a dict
-        price = ticker.fast_info.last_price
+        url = "https://query1.finance.yahoo.com/v8/finance/chart/CTSH"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(url, headers=headers, timeout=5)
+        r.raise_for_status()
+        price = r.json()["chart"]["result"][0]["meta"]["regularMarketPrice"]
         if price and price > 0:
             return max(30, min(90, int(round(price))))
-    except Exception:
-        pass
-    try:
-        hist = yf.Ticker("CTSH").history(period="1d")
-        if not hist.empty:
-            return max(30, min(90, int(round(hist["Close"].iloc[-1]))))
     except Exception:
         pass
     return 54

@@ -1,6 +1,7 @@
 data/
 *.json
 .streamlit/secrets.toml
+.streamlit/temp
 __pycache__/
 *.pyc
 .env

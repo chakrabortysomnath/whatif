@@ -36,6 +36,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
+/* ── APP HEADER ── */
+.app-header{background:var(--bg2);border-bottom:2px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px}
+.app-header-icon{font-size:26px;line-height:1}
+.app-header-text{}
+.app-header-title{font-family:'Fraunces',serif;font-size:26px;font-weight:500;color:var(--text);letter-spacing:-.5px;line-height:1}
+.app-header-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
 /* ── TOP BAR ── */
 .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px}
 .topbar-inner{display:flex;align-items:center;gap:0;height:52px;overflow-x:auto}
@@ -151,6 +158,15 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </style>
 </head>
 <body>
+
+<!-- APP HEADER -->
+<div class="app-header">
+  <div class="app-header-icon">📊</div>
+  <div class="app-header-text">
+    <div class="app-header-title">What If</div>
+    <div class="app-header-sub">Personal financial scenario modeller</div>
+  </div>
+</div>
 
 <!-- TOP BAR -->
 <div class="topbar">

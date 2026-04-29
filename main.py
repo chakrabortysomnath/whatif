@@ -25,19 +25,27 @@ def get_ctsh_price() -> int:
     now = time.time()
     if now - _price["ts"] < 300:          # cached for 5 min
         return _price["v"]
-    try:
-        r = http.get(
-            "https://query1.finance.yahoo.com/v8/finance/chart/CTSH",
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=5,
-        )
-        r.raise_for_status()
-        price = r.json()["chart"]["result"][0]["meta"]["regularMarketPrice"]
-        if price and price > 0:
-            _price["v"] = max(30, min(90, int(round(price))))
-            _price["ts"] = now
-    except Exception:
-        pass
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://finance.yahoo.com/",
+    }
+    for host in ("query1", "query2"):
+        try:
+            r = http.get(
+                f"https://{host}.finance.yahoo.com/v8/finance/chart/CTSH",
+                headers=headers,
+                timeout=5,
+            )
+            r.raise_for_status()
+            price = r.json()["chart"]["result"][0]["meta"]["regularMarketPrice"]
+            if price and price > 0:
+                _price["v"] = max(30, min(90, int(round(price))))
+                _price["ts"] = now
+                return _price["v"]
+        except Exception:
+            continue
     return _price["v"]
 
 
@@ -229,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {{
     }}
     function setSyncPair(id, v) {{ setVal(id, v); setVal(id + '-n', v); }}
 
-    setSyncPair('ctsh',   s.ctsh);
+    // ctsh is always set from live Yahoo Finance price — not from saved state
     setSyncPair('usdinr', s.usdinr);
     setSyncPair('gbpinr', s.gbpinr);
     setSyncPair('sgdinr', s.sgdinr);
@@ -260,6 +268,19 @@ document.addEventListener('DOMContentLoaded', function() {{
 
     if (typeof renderAllTables === 'function') renderAllTables();
     if (typeof update === 'function') update();
+
+    // Always refresh CTSH from live Yahoo Finance price
+    fetch('/api/ctsh')
+        .then(r => r.json())
+        .then(d => {{
+            if (d.price) {{
+                setSyncPair('ctsh', d.price);
+                const vEl = document.getElementById('v-ctsh');
+                if (vEl) vEl.textContent = '$' + d.price;
+                if (typeof update === 'function') update();
+            }}
+        }})
+        .catch(() => {{}});
 }});
 </script>"""
 

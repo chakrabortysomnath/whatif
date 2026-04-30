@@ -33,7 +33,11 @@ DEFAULT_STATE = {
     "quarterlyExp": [],
     "rsuSchedule": [],
     "raiRows": [],
-    "neilRows": []
+    "neilRows": [],
+    "swpAsset": "none",
+    "swpMonthly": 50000,
+    "swpStartYr": 2026,
+    "swpRate": 0.08
 }
 
 def load_state() -> dict:

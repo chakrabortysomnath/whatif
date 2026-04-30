@@ -18,6 +18,29 @@ COOKIE_TTL   = 86400 * 30          # 30 days
 
 signer = URLSafeTimedSerializer(SECRET_KEY)
 
+# ── Forex rates cache (frankfurter.app — free, no key) ───────────────────
+_forex: dict = {"usdinr": 84.0, "gbpinr": 107.0, "sgdinr": 63.0, "ts": 0.0}
+
+def get_forex_rates() -> dict:
+    now = time.time()
+    if now - _forex["ts"] < 300:
+        return {k: _forex[k] for k in ("usdinr", "gbpinr", "sgdinr")}
+    try:
+        r = http.get(
+            "https://api.frankfurter.app/latest?from=INR&to=USD,GBP,SGD",
+            timeout=5,
+        )
+        r.raise_for_status()
+        rates = r.json()["rates"]
+        _forex["usdinr"] = round(1 / rates["USD"], 2)
+        _forex["gbpinr"] = round(1 / rates["GBP"], 2)
+        _forex["sgdinr"] = round(1 / rates["SGD"], 2)
+        _forex["ts"] = now
+    except Exception:
+        pass
+    return {k: _forex[k] for k in ("usdinr", "gbpinr", "sgdinr")}
+
+
 # ── CTSH price cache ──────────────────────────────────────────────────────
 _price: dict = {"v": 54, "ts": 0.0}
 
@@ -184,7 +207,11 @@ async function saveState() {{
             quarterlyExp: window.quarterlyExp || [],
             rsuSchedule: window.rsuSchedule || [],
             raiRows: window.raiRows || [],
-            neilRows: window.neilRows || []
+            neilRows: window.neilRows || [],
+            swpAsset: (document.getElementById('swp-asset') || {{}}).value || 'none',
+            swpMonthly: +(document.getElementById('swp-monthly') || {{}}).value || 50000,
+            swpStartYr: +(document.getElementById('swp-start-yr') || {{}}).value || 2026,
+            swpRate: +(document.getElementById('swp-rate') || {{}}).value / 100 || 0.08
         }};
         const r = await fetch('/api/save', {{
             method: 'POST',
@@ -237,11 +264,14 @@ document.addEventListener('DOMContentLoaded', function() {{
     }}
     function setSyncPair(id, v) {{ setVal(id, v); setVal(id + '-n', v); }}
 
-    // ctsh is always set from live Yahoo Finance price — not from saved state
-    setSyncPair('usdinr', s.usdinr);
-    setSyncPair('gbpinr', s.gbpinr);
-    setSyncPair('sgdinr', s.sgdinr);
-    setSyncPair('ret',    s.ret);
+    // ctsh, usdinr, gbpinr, sgdinr — always refreshed from live APIs, not saved state
+    setSyncPair('ret', s.ret);
+
+    // SWP
+    if (s.swpAsset)   {{ const el = document.getElementById('swp-asset');    if(el) el.value = s.swpAsset; }}
+    if (s.swpMonthly) setVal('swp-monthly', s.swpMonthly);
+    if (s.swpStartYr) {{ const el = document.getElementById('swp-start-yr'); if(el) el.value = s.swpStartYr; }}
+    if (s.swpRate)    {{ setSyncPair('swp-rate', s.swpRate * 100); }}
 
     ['fa','facoa','fatax','gw','gwcoa','gwtax',
      'inrc','inreq','propval','propyr','absli','absliyr','grat','gratdelay']
@@ -269,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {{
     if (typeof renderAllTables === 'function') renderAllTables();
     if (typeof update === 'function') update();
 
-    // Always refresh CTSH from live Yahoo Finance price
+    // Always refresh CTSH + forex from live APIs
     fetch('/api/ctsh')
         .then(r => r.json())
         .then(d => {{
@@ -277,6 +307,29 @@ document.addEventListener('DOMContentLoaded', function() {{
                 setSyncPair('ctsh', d.price);
                 const vEl = document.getElementById('v-ctsh');
                 if (vEl) vEl.textContent = '$' + d.price;
+                if (typeof update === 'function') update();
+            }}
+        }})
+        .catch(() => {{}});
+
+    fetch('/api/forex')
+        .then(r => r.json())
+        .then(d => {{
+            if (d.usdinr) {{
+                setSyncPair('usdinr', d.usdinr);
+                setSyncPair('gbpinr', d.gbpinr);
+                setSyncPair('sgdinr', d.sgdinr);
+                // Show LIVE badge on each forex label
+                ['usdinr','gbpinr','sgdinr'].forEach(id => {{
+                    const lbl = document.querySelector(`[for="${{id}}"], .tb-group .tb-lbl`);
+                    const valEl = document.getElementById('v-' + id);
+                    if (valEl && !valEl.querySelector('.live-badge')) {{
+                        const badge = document.createElement('span');
+                        badge.className = 'live-badge';
+                        badge.textContent = 'LIVE';
+                        valEl.appendChild(badge);
+                    }}
+                }});
                 if (typeof update === 'function') update();
             }}
         }})
@@ -318,3 +371,10 @@ async def api_ctsh(request: Request):
     if not is_auth(request):
         return JSONResponse({"ok": False}, status_code=401)
     return JSONResponse({"price": get_ctsh_price()})
+
+
+@app.get("/api/forex")
+async def api_forex(request: Request):
+    if not is_auth(request):
+        return JSONResponse({"ok": False}, status_code=401)
+    return JSONResponse(get_forex_rates())

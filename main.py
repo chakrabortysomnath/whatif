@@ -319,17 +319,9 @@ document.addEventListener('DOMContentLoaded', function() {{
                 setSyncPair('usdinr', d.usdinr);
                 setSyncPair('gbpinr', d.gbpinr);
                 setSyncPair('sgdinr', d.sgdinr);
-                // Show LIVE badge on each forex label
-                ['usdinr','gbpinr','sgdinr'].forEach(id => {{
-                    const lbl = document.querySelector(`[for="${{id}}"], .tb-group .tb-lbl`);
-                    const valEl = document.getElementById('v-' + id);
-                    if (valEl && !valEl.querySelector('.live-badge')) {{
-                        const badge = document.createElement('span');
-                        badge.className = 'live-badge';
-                        badge.textContent = 'LIVE';
-                        valEl.appendChild(badge);
-                    }}
-                }});
+                // Show LIVE badge
+                const badge = document.getElementById('forex-live-badge');
+                if (badge) badge.style.display = '';
                 if (typeof update === 'function') update();
             }}
         }})

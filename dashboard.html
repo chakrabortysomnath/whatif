@@ -185,6 +185,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
         <input type="number" id="ctsh-n" value="54" min="30" max="90">
       </div>
       <span class="tb-val" id="v-ctsh">$54</span>
+      <span class="live-badge" id="ctsh-live-badge" style="display:none" title="Price fetched live from Yahoo Finance">🟢 LIVE</span>
     </div>
 
     <div class="tb-sep"></div>
@@ -320,50 +321,28 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="card">
     <div class="card-hdr" onclick="toggleCard('c-swp')">
       <div style="display:flex;align-items:center;gap:8px">
-        <span class="card-title">SWP configuration</span>
-        <span class="card-meta" id="swp-meta">Select a corpus to activate</span>
+        <span class="card-title">SWP lines</span>
+        <span class="card-meta" id="swp-meta">No SWP configured</span>
       </div>
       <span class="card-arrow open" id="arr-c-swp">▶</span>
     </div>
     <div class="card-body" id="c-swp">
-      <div class="ctx-grid">
-        <div class="ctx-item">
-          <span class="ctx-lbl">Corpus source</span>
-          <div class="ctx-row">
-            <select id="swp-asset" class="swp-sel" oninput="update()">
-              <option value="none">None</option>
-              <option value="fa">Fine Advice</option>
-              <option value="gw">Growealth</option>
-              <option value="prop">Property LK-866</option>
-              <option value="absli">ABSLI</option>
-              <option value="grat">Gratuity + PF</option>
-            </select>
-          </div>
-        </div>
-        <div class="ctx-item">
-          <span class="ctx-lbl">Monthly withdrawal (₹)</span>
-          <div class="ctx-row"><input type="number" id="swp-monthly" value="50000" step="5000" style="width:100px" oninput="update()"><span class="ctx-val" id="v-swp-monthly">₹50K/mo</span></div>
-        </div>
-        <div class="ctx-item">
-          <span class="ctx-lbl">SWP start year</span>
-          <div class="ctx-row">
-            <select id="swp-start-yr" class="swp-sel" oninput="update()">
-              <option>2026</option><option>2027</option><option>2028</option>
-              <option>2029</option><option>2030</option><option>2031</option>
-              <option>2032</option><option>2033</option><option>2034</option>
-              <option>2035</option>
-            </select>
-          </div>
-        </div>
-        <div class="ctx-item">
-          <span class="ctx-lbl">Fund return rate (%)</span>
-          <div class="ctx-row">
-            <input type="range" id="swp-rate" min="0" max="15" step="0.5" value="8" oninput="document.getElementById('swp-rate-n').value=this.value;update()">
-            <input type="number" id="swp-rate-n" value="8" min="0" max="15" step="0.5" style="width:58px" oninput="document.getElementById('swp-rate').value=this.value;update()">
-            <span class="ctx-val" id="v-swp-rate">8.0%</span>
-          </div>
-        </div>
+      <div style="overflow-x:auto">
+        <table class="exp-table">
+          <thead>
+            <tr>
+              <th style="min-width:130px">Asset</th>
+              <th style="min-width:95px;text-align:right">SWP corpus (₹L)</th>
+              <th style="min-width:80px;text-align:right">Monthly (₹K)</th>
+              <th style="min-width:90px">From year</th>
+              <th style="min-width:65px;text-align:right">Return %</th>
+              <th style="width:24px"></th>
+            </tr>
+          </thead>
+          <tbody id="swp-body"></tbody>
+        </table>
       </div>
+      <button class="add-btn" onclick="addSWPRow()">+ Add SWP line</button>
       <div class="msr-bar" id="swp-bar" style="display:none;margin-top:10px"></div>
     </div>
   </div>
@@ -539,6 +518,42 @@ let monthlyExp=[
 ];
 let quarterlyExp=[{id:101,name:'Tukun',val:50000},{id:102,name:'Misc Travel',val:200000}];
 let nxtId=300;
+let swpRows=[];
+
+const SWP_ASSETS=[
+  {v:'fa',l:'Fine Advice'},{v:'gw',l:'Growealth'},{v:'prop',l:'Property'},
+  {v:'absli',l:'ABSLI'},{v:'grat',l:'Gratuity + PF'},
+];
+
+function renderSWPTable(){
+  const tb=document.getElementById('swp-body');if(!tb)return;tb.innerHTML='';
+  swpRows.forEach(r=>{
+    const assetOpts=SWP_ASSETS.map(a=>`<option value="${a.v}"${r.asset===a.v?' selected':''}>${a.l}</option>`).join('');
+    const yrOpts=[2026,2027,2028,2029,2030,2031,2032,2033,2034,2035].map(y=>`<option${r.startYr===y?' selected':''}>${y}</option>`).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      `<td><select class="swp-sel" onchange="updSWP(${r.id},'asset',this.value)">${assetOpts}</select></td>`+
+      `<td style="text-align:right"><input class="amt" type="number" value="${(r.amount/1e5).toFixed(0)}" step="1" min="0" style="width:76px" onchange="updSWP(${r.id},'amount',+this.value*1e5)"></td>`+
+      `<td style="text-align:right"><input class="amt" type="number" value="${(r.monthly/1000).toFixed(0)}" step="5" min="0" style="width:65px" onchange="updSWP(${r.id},'monthly',+this.value*1000)"></td>`+
+      `<td><select class="swp-sel" onchange="updSWP(${r.id},'startYr',+this.value)">${yrOpts}</select></td>`+
+      `<td style="text-align:right"><input class="amt" type="number" value="${r.rate}" step="0.5" min="0" max="15" style="width:52px" onchange="updSWP(${r.id},'rate',+this.value)"></td>`+
+      `<td><button class="del-btn" onclick="delSWP(${r.id})">&times;</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+function addSWPRow(){
+  swpRows.push({id:nxtId++,asset:'fa',amount:1e7,monthly:50000,startYr:2026,rate:8});
+  renderSWPTable();update();
+}
+function updSWP(id,key,val){
+  const r=swpRows.find(x=>x.id===id);
+  if(r)r[key]=(key==='asset')?val:+val;
+  update();
+}
+function delSWP(id){
+  swpRows=swpRows.filter(x=>x.id!==id);
+  renderSWPTable();update();
+}
 
 const g=id=>document.getElementById(id);
 const fI=v=>{const a=Math.abs(v);let s=a>=1e7?'₹'+(a/1e7).toFixed(2)+'Cr':a>=1e5?'₹'+(a/1e5).toFixed(1)+'L':'₹'+Math.round(a).toLocaleString('en-IN');return v<0?'('+s+')':s};
@@ -577,10 +592,6 @@ function getP(){
     usdinr:+g('usdinr').value, gbpinr:+g('gbpinr').value, sgdinr:+g('sgdinr').value,
     emplOn, emplEndMo, emplEndYr,
     tFa:g('t-fa').checked?1:0, tGw:g('t-gw').checked?1:0,
-    swpAsset:g('swp-asset')?.value||'none',
-    swpMonthly:+(g('swp-monthly')?.value||50000),
-    swpStartYr:+(g('swp-start-yr')?.value||2026),
-    swpRate:+(g('swp-rate')?.value||8)/100,
   };
 }
 
@@ -635,47 +646,50 @@ function buildYears(p){
   let inrBal=p.inrc+p.inreq;
   const gyr=gratYear(p);
 
-  // ── SWP setup ──────────────────────────────────────────────────────────
-  const swpOn=p.swpAsset!=='none';
-  // Asset availability year (corpus first becomes accessible)
-  const swpAvailYr={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gyr}[p.swpAsset]||2026;
-  const swpEffStartYr=Math.max(p.swpStartYr,swpAvailYr);
-  // Initial corpus value at availability
-  const swpInitCorpus=swpOn?({
+  // ── Multi-SWP setup ────────────────────────────────────────────────
+  const assetNet={
     fa:netTax(p.fa,p.facoa,p.fatax)*p.tFa,
     gw:netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw,
-    prop:p.propval,
-    absli:p.absli,
-    grat:p.grat,
-  }[p.swpAsset]||0):0;
-  let swpCorpus=0; // grows from swpAvailYr
+    prop:p.propval,absli:p.absli,grat:p.grat,
+  };
+  const assetAvailYr={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gyr};
+  // Per-row mutable state
+  const swpState=swpRows.map(r=>{
+    const av=assetAvailYr[r.asset]||2026;
+    const initAmt=Math.min(r.amount,assetNet[r.asset]||0);
+    return{asset:r.asset,corpus:0,monthly:r.monthly,rate:r.rate/100,
+           availYr:av,startYr:Math.max(r.startYr,av),initAmt};
+  });
+  // Total SWP allocation per asset
+  const swpAlloc={};
+  swpState.forEach(s=>{swpAlloc[s.asset]=(swpAlloc[s.asset]||0)+s.initAmt;});
+  const residual=a=>Math.max(0,(assetNet[a]||0)-(swpAlloc[a]||0));
+  const hasSWP  =a=>(swpAlloc[a]||0)>0;
 
   return YEARS.map(yr=>{
-    // Activate corpus at availability year
-    if(swpOn && yr===swpAvailYr) swpCorpus=swpInitCorpus;
-
-    // Grow corpus, then withdraw if past start year
     let swpIncome=0;
-    if(swpOn && swpCorpus>0){
-      swpCorpus+=swpCorpus*p.swpRate;          // annual return first
-      if(yr>=swpEffStartYr){
-        swpIncome=Math.min(p.swpMonthly*12,swpCorpus);
-        swpCorpus-=swpIncome;
+    swpState.forEach(s=>{
+      if(yr===s.availYr) s.corpus=s.initAmt;
+      if(s.corpus>0){
+        s.corpus+=s.corpus*s.rate;
+        if(yr>=s.startYr){
+          const draw=Math.min(s.monthly*12,s.corpus);
+          swpIncome+=draw;s.corpus-=draw;
+        }
       }
-    }
-
+    });
     const open=inrBal;
     const ret=open>0?open*p.ret:0;
     const salMo=emplMonthsInYear(yr,p);
     const sal=(SAL_ANNUAL/12)*salMo;
     const rsuUnits=rsuInYear(yr,p);
     const rsu=rsuUnits*p.ctsh*0.85*p.usdinr;
-    // One-time inflows — suppressed for whichever asset is used as SWP corpus
-    const faI  =yr===2026      &&p.swpAsset!=='fa'   ?netTax(p.fa,p.facoa,p.fatax)*p.tFa:0;
-    const gwI  =yr===2026      &&p.swpAsset!=='gw'   ?netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw:0;
-    const prop =yr===p.propyr  &&p.swpAsset!=='prop' ?p.propval:0;
-    const absliI=yr===p.absliyr&&p.swpAsset!=='absli'?p.absli:0;
-    const gratI=yr===gyr       &&p.swpAsset!=='grat' ?p.grat:0;
+    // One-time inflows — residual for SWP assets, full value otherwise
+    const faI  =yr===2026     ?(hasSWP('fa')   ?residual('fa')   :assetNet.fa)  :0;
+    const gwI  =yr===2026     ?(hasSWP('gw')   ?residual('gw')   :assetNet.gw)  :0;
+    const prop =yr===p.propyr ?(hasSWP('prop') ?residual('prop') :p.propval)    :0;
+    const absliI=yr===p.absliyr?(hasSWP('absli')?residual('absli'):p.absli)     :0;
+    const gratI=yr===gyr      ?(hasSWP('grat') ?residual('grat') :p.grat)       :0;
     const sgdLiq=yr===2026?(p.eq+p.sgdc)*p.sgdinr:0;
     const msrI=yr===2029?p.msr*p.sgdinr:0;
     const msrMo=p.msrMo[yr]||0;
@@ -692,24 +706,17 @@ function buildYears(p){
   });
 }
 
-// Estimate SWP corpus depletion year (simulates beyond 2035)
-function swpDepletionYr(p){
+// Estimate depletion year for one SWP row
+function swpDepletionYr(row,p){
   const gyr=gratYear(p);
-  const swpAvailYr={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gyr}[p.swpAsset]||2026;
-  const swpEffStartYr=Math.max(p.swpStartYr,swpAvailYr);
-  const initCorpus={
-    fa:netTax(p.fa,p.facoa,p.fatax)*p.tFa,
-    gw:netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw,
-    prop:p.propval, absli:p.absli, grat:p.grat,
-  }[p.swpAsset]||0;
-  let corpus=0;
-  for(let yr=swpAvailYr;yr<=2070;yr++){
-    if(yr===swpAvailYr) corpus=initCorpus;
-    corpus+=corpus*p.swpRate;
-    if(yr>=swpEffStartYr){
-      corpus-=p.swpMonthly*12;
-      if(corpus<=0) return yr;
-    }
+  const av={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gyr}[row.asset]||2026;
+  const startYr=Math.max(row.startYr,av);
+  const assetNet={fa:netTax(p.fa,p.facoa,p.fatax)*p.tFa,gw:netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw,
+    prop:p.propval,absli:p.absli,grat:p.grat}[row.asset]||0;
+  let corpus=Math.min(row.amount,assetNet);
+  for(let yr=av;yr<=2070;yr++){
+    corpus+=corpus*(row.rate/100);
+    if(yr>=startYr){corpus-=row.monthly*12;if(corpus<=0)return yr;}
   }
   return '2070+';
 }
@@ -864,6 +871,7 @@ function renderAllTables(){
   renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
   renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
   renderRSUTable();
+  renderSWPTable();
 }
 
 function toggleEmpl(){
@@ -913,22 +921,22 @@ function update(){
   st('v-gratdelay',p.gratdelay+'mo');
 
   // SWP panel
-  const swpNames={fa:'Fine Advice',gw:'Growealth',prop:'Property LK-866',absli:'ABSLI',grat:'Gratuity + PF',none:'None'};
-  st('v-swp-monthly','₹'+(p.swpMonthly/1000).toFixed(0)+'K/mo');
-  st('v-swp-rate',(p.swpRate*100).toFixed(1)+'%');
+  const swpNames={fa:'Fine Advice',gw:'Growealth',prop:'Property',absli:'ABSLI',grat:'Gratuity + PF'};
   const swpBar=g('swp-bar');
-  if(p.swpAsset!=='none'&&swpBar){
-    const gyr2=gratYear(p);
-    const swpAvailYr2={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gyr2}[p.swpAsset]||2026;
-    const initC={fa:netTax(p.fa,p.facoa,p.fatax)*p.tFa,gw:netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw,prop:p.propval,absli:p.absli,grat:p.grat}[p.swpAsset]||0;
-    const depYr=swpDepletionYr(p);
-    const effStart=Math.max(p.swpStartYr,swpAvailYr2);
+  if(swpRows.length>0&&swpBar){
     swpBar.style.display='';
-    swpBar.textContent=`SWP: ${swpNames[p.swpAsset]} · corpus ${fI(initC)} · ${(p.swpRate*100).toFixed(1)}% p.a. · ₹${(p.swpMonthly/1000).toFixed(0)}K/mo from ${effStart} · est. depletion: ${depYr}`;
-    st('swp-meta',`${swpNames[p.swpAsset]} · ₹${(p.swpMonthly/1000).toFixed(0)}K/mo from ${effStart} · depletes ~${depYr}`);
+    swpBar.innerHTML=swpRows.map(r=>{
+      const nm=swpNames[r.asset]||r.asset;
+      const dep=swpDepletionYr(r,p);
+      const av={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gratYear(p)}[r.asset]||2026;
+      const effStart=Math.max(r.startYr,av);
+      return `${nm} · corpus ${fI(r.amount)} · ${r.rate}% p.a. · ₹${(r.monthly/1000).toFixed(0)}K/mo from ${effStart} → depletes ~${dep}`;
+    }).join('<br>');
+    const totMo=swpRows.reduce((s,r)=>s+r.monthly,0);
+    st('swp-meta',`${swpRows.length} line${swpRows.length>1?'s':''} · ₹${(totMo/1000).toFixed(0)}K/mo total`);
   } else if(swpBar){
     swpBar.style.display='none';
-    st('swp-meta','Select a corpus to activate');
+    st('swp-meta','No SWP configured');
   }
 
   st('monthly-tot','₹'+totM().toLocaleString('en-IN'));
@@ -1026,7 +1034,7 @@ function update(){
     {l:'Property LK-866',cls:'ast',v:ydata.map(d=>d.prop>0?fI(d.prop):'—')},
     {l:'ABSLI maturity',cls:'ast',v:ydata.map(d=>d.absliI>0?fI(d.absliI):'—')},
     {l:'Gratuity + PF',cls:'ast',v:ydata.map(d=>d.gratI>0?fI(d.gratI):'—')},
-    {l:'SWP income ('+({'fa':'Fine Advice','gw':'Growealth','prop':'Property','absli':'ABSLI','grat':'Gratuity','none':'—'}[p.swpAsset]||'—')+')',cls:'ast',v:ydata.map(d=>d.swpIncome>0?fI(d.swpIncome):'—')},
+    {l:'SWP income'+(swpRows.length?` (${swpRows.length} line${swpRows.length>1?'s':''})` :''),cls:'ast',v:ydata.map(d=>d.swpIncome>0?fI(d.swpIncome):'—')},
     {l:'SGD equity + cash (2026)',cls:'ast',v:ydata.map(d=>d.sgdLiq>0?fI(d.sgdLiq):'—')},
     {l:'MSR corpus arrives',cls:'msr-i',v:ydata.map(d=>d.msrI>0?fI(d.msrI):'—')},
     {l:`Return on INR balance (${(p.ret*100).toFixed(1)}%)`,cls:'ret',v:ydata.map(d=>d.ret>0?fI(d.ret):'—')},

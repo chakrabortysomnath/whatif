@@ -208,10 +208,7 @@ async function saveState() {{
             rsuSchedule: window.rsuSchedule || [],
             raiRows: window.raiRows || [],
             neilRows: window.neilRows || [],
-            swpAsset: (document.getElementById('swp-asset') || {{}}).value || 'none',
-            swpMonthly: +(document.getElementById('swp-monthly') || {{}}).value || 50000,
-            swpStartYr: +(document.getElementById('swp-start-yr') || {{}}).value || 2026,
-            swpRate: +(document.getElementById('swp-rate') || {{}}).value / 100 || 0.08
+            swpRows: window.swpRows || []
         }};
         const r = await fetch('/api/save', {{
             method: 'POST',
@@ -267,11 +264,11 @@ document.addEventListener('DOMContentLoaded', function() {{
     // ctsh, usdinr, gbpinr, sgdinr — always refreshed from live APIs, not saved state
     setSyncPair('ret', s.ret);
 
-    // SWP
-    if (s.swpAsset)   {{ const el = document.getElementById('swp-asset');    if(el) el.value = s.swpAsset; }}
-    if (s.swpMonthly) setVal('swp-monthly', s.swpMonthly);
-    if (s.swpStartYr) {{ const el = document.getElementById('swp-start-yr'); if(el) el.value = s.swpStartYr; }}
-    if (s.swpRate)    {{ setSyncPair('swp-rate', s.swpRate * 100); }}
+    // SWP rows
+    if (s.swpRows && s.swpRows.length) {{
+        window.swpRows = s.swpRows;
+        if (typeof renderSWPTable === 'function') renderSWPTable();
+    }}
 
     ['fa','facoa','fatax','gw','gwcoa','gwtax',
      'inrc','inreq','propval','propyr','absli','absliyr','grat','gratdelay']
@@ -307,6 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {{
                 setSyncPair('ctsh', d.price);
                 const vEl = document.getElementById('v-ctsh');
                 if (vEl) vEl.textContent = '$' + d.price;
+                const ctshBadge = document.getElementById('ctsh-live-badge');
+                if (ctshBadge) ctshBadge.style.display = '';
                 if (typeof update === 'function') update();
             }}
         }})

@@ -208,7 +208,8 @@ async function saveState() {{
             rsuSchedule: window.rsuSchedule || [],
             raiRows: window.raiRows || [],
             neilRows: window.neilRows || [],
-            swpRows: window.swpRows || []
+            swpRows: window.swpRows || [],
+            oneOffRows: window.oneOffRows || []
         }};
         const r = await fetch('/api/save', {{
             method: 'POST',
@@ -292,6 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {{
     if (s.rsuSchedule  && s.rsuSchedule.length)   window.rsuSchedule  = s.rsuSchedule;
     if (s.raiRows      && s.raiRows.length)        window.raiRows      = s.raiRows;
     if (s.neilRows     && s.neilRows.length)       window.neilRows     = s.neilRows;
+    if (s.oneOffRows   && s.oneOffRows.length)     window.oneOffRows   = s.oneOffRows;
 
     if (typeof renderAllTables === 'function') renderAllTables();
     if (typeof update === 'function') update();

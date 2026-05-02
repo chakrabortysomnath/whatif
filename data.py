@@ -37,7 +37,8 @@ DEFAULT_STATE = {
     "swpAsset": "none",
     "swpMonthly": 50000,
     "swpStartYr": 2026,
-    "swpRate": 0.08
+    "swpRate": 0.08,
+    "oneOffRows": []
 }
 
 def load_state() -> dict:

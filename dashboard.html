@@ -46,7 +46,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 /* ── TOP BAR ── */
 .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px}
 .topbar-inner{display:flex;align-items:center;gap:0;height:52px;overflow-x:auto}
-.tb-title{font-family:'Fraunces',serif;font-size:16px;color:var(--text);white-space:nowrap;padding-right:16px;margin-right:8px;border-right:1px solid var(--border)}
 .tb-sep{width:1px;height:28px;background:var(--border);flex-shrink:0;margin:0 10px}
 .tb-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .tb-lbl{font-size:10px;color:var(--text3);white-space:nowrap}
@@ -178,6 +177,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .swp-sel{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:11px;padding:4px 8px;border-radius:5px;font-family:'Inter',sans-serif;cursor:pointer;outline:none}
 .swp-sel:focus{border-color:var(--accent)}
 .live-badge{font-size:9px;font-weight:600;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:3px;padding:1px 5px;margin-left:4px;vertical-align:middle}
+.tab-flow-bar{background:var(--accent-bg);border:1px solid var(--accent-light);border-radius:8px;padding:8px 12px;margin:16px 24px 0;overflow-x:auto}
+.tab-flow-bar table{border-collapse:collapse;font-size:10px;width:100%}
+.tab-flow-bar th{font-size:9px;color:var(--text3);font-weight:500;padding:2px 6px;text-align:center;white-space:nowrap}
+.tab-flow-bar td{font-family:'DM Mono',monospace;font-size:10px;padding:2px 6px;text-align:center;white-space:nowrap;color:var(--accent)}
+.tab-flow-bar .flow-lbl{color:var(--text2);font-size:9px;font-weight:600;text-align:left;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -201,8 +205,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-inner">
-    <div class="tb-title">Portfolio What-If</div>
-
     <div class="tb-group">
       <span class="tb-lbl">CTSH</span>
       <div class="tb-ctrl">
@@ -211,6 +213,17 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       </div>
       <span class="tb-val" id="v-ctsh">$54</span>
       <span class="live-badge" id="ctsh-live-badge" style="display:none" title="Price fetched live from Yahoo Finance">🟢 LIVE</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">Inflation</span>
+      <div class="tb-ctrl">
+        <input type="range" id="infl" min="0" max="10" step="0.5" value="3">
+        <input type="number" id="infl-n" value="3" step="0.5" min="0" max="10">
+      </div>
+      <span class="tb-val" id="v-infl">3.0%</span>
     </div>
 
     <div class="tb-sep"></div>
@@ -228,8 +241,18 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
     <div class="tog-group">
       <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">Salary &amp; RSU</label>
-      <span class="tb-lbl" style="margin-left:4px">End MMYY</span>
-      <input type="text" id="empl-end" value="1228" maxlength="4" placeholder="MMYY" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:3px 5px;border-radius:4px;text-align:center" oninput="update()">
+      <select id="empl-end" onchange="update()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:10px;padding:3px 6px;border-radius:4px;font-family:'DM Mono',monospace;margin-left:6px"></select>
+    </div>
+
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <span class="tb-lbl">View to</span>
+      <select id="end-yr" onchange="update()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:10px;padding:3px 6px;border-radius:4px;font-family:'DM Mono',monospace">
+        <option value="2035" selected>2035</option>
+        <option value="2040">2040</option>
+        <option value="2045">2045</option>
+        <option value="2050">2050</option>
+      </select>
     </div>
 
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">Dark mode</button>
@@ -248,20 +271,22 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <!-- TAB NAVIGATION -->
 <div class="tab-nav">
-  <button class="tab-btn active" data-tab="t-summary" onclick="switchTab('t-summary')">📊 Summary</button>
+  <button class="tab-btn active" data-tab="t-cashflow" onclick="switchTab('t-cashflow')">💰 Cash Flow</button>
   <button class="tab-btn" data-tab="t-assets" onclick="switchTab('t-assets')">💼 Assets</button>
+  <button class="tab-btn" data-tab="t-rsu" onclick="switchTab('t-rsu')">📋 RSU</button>
   <button class="tab-btn" data-tab="t-swp" onclick="switchTab('t-swp')">📈 SWP</button>
   <button class="tab-btn" data-tab="t-expenses" onclick="switchTab('t-expenses')">🏠 Expenses</button>
+  <button class="tab-btn" data-tab="t-oneoff" onclick="switchTab('t-oneoff')">🎯 One-off</button>
   <button class="tab-btn" data-tab="t-gbp" onclick="switchTab('t-gbp')">🇬🇧 Rai &amp; Neil</button>
   <button class="tab-btn" data-tab="t-msr" onclick="switchTab('t-msr')">🏦 MSR</button>
 </div>
 
 <div class="page">
 
-<!-- ── TAB: Summary (cashflow only) ── -->
-<div class="tab-pane active" id="t-summary">
+<!-- ── TAB: Cash Flow ── -->
+<div class="tab-pane active" id="t-cashflow">
 <div class="section">
-  <div class="sec-title"><span class="sec-num">CF</span> Year-by-year cash flow — 2026 to 2035</div>
+  <div class="sec-title"><span class="sec-num">CF</span> Year-by-year cash flow</div>
   <div class="card">
     <div class="card-hdr" onclick="toggleCard('c-chart')">
       <span class="card-title">Annual net &amp; closing balance</span>
@@ -286,6 +311,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <!-- ── TAB: Assets ── -->
 <div class="tab-pane" id="t-assets">
+<div class="tab-flow-bar" id="flow-assets"></div>
 <div class="section">
   <div class="sec-title"><span class="sec-num">01</span> Assets snapshot</div>
 
@@ -328,6 +354,14 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     </div>
   </div>
 
+</div>
+</div>
+
+<!-- ── TAB: RSU ── -->
+<div class="tab-pane" id="t-rsu">
+<div class="tab-flow-bar" id="flow-rsu"></div>
+<div class="section">
+  <div class="sec-title"><span class="sec-num">RSU</span> RSU vesting schedule</div>
   <div class="card">
     <div class="card-hdr" onclick="toggleCard('c-rsu')">
       <div style="display:flex;align-items:center;gap:8px">
@@ -354,6 +388,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <!-- ── TAB: SWP ── -->
 <div class="tab-pane" id="t-swp">
+<div class="tab-flow-bar" id="flow-swp"></div>
 <div class="section">
   <div class="sec-title"><span class="sec-num">SWP</span> Systematic Withdrawal Plan</div>
   <div class="card">
@@ -391,6 +426,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <!-- ── TAB: India Expenses ── -->
 <div class="tab-pane" id="t-expenses">
+<div class="tab-flow-bar" id="flow-expenses"></div>
 <div class="section">
   <div class="sec-title"><span class="sec-num">02</span> India expenses (INR)</div>
 
@@ -426,8 +462,35 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div>
 </div>
 
+<!-- ── TAB: One-off Expenses ── -->
+<div class="tab-pane" id="t-oneoff">
+<div class="tab-flow-bar" id="flow-oneoff"></div>
+<div class="section">
+  <div class="sec-title"><span class="sec-num">1×</span> One-off expenses</div>
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-oneoff')">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="card-title">One-time expenses</span>
+        <span class="card-meta" id="oneoff-meta">—</span>
+      </div>
+      <span class="card-arrow open" id="arr-c-oneoff">▶</span>
+    </div>
+    <div class="card-body" id="c-oneoff">
+      <div style="overflow-x:auto">
+        <table class="exp-table">
+          <thead><tr><th>Description</th><th style="min-width:100px;text-align:right">Amount (₹Cr)</th><th style="min-width:70px;text-align:right">Year</th><th style="width:24px"></th></tr></thead>
+          <tbody id="oneoff-body"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" onclick="addOneOff()">+ Add one-off expense</button>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- ── TAB: Rai & Neil ── -->
 <div class="tab-pane" id="t-gbp">
+<div class="tab-flow-bar" id="flow-gbp"></div>
 <div class="section">
   <div class="sec-title"><span class="sec-num">03</span> Rai (Trisha) &amp; Neil (Ayush) — GBP expenses</div>
 
@@ -437,6 +500,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <span class="card-arrow open" id="arr-c-rai">▶</span>
     </div>
     <div class="card-body" id="c-rai">
+      <div class="msr-bar" id="rai-summary" style="margin-bottom:8px"></div>
       <div class="yr-wrap"><table class="yr-tbl" id="rai-tbl"></table></div>
       <button class="add-btn" onclick="addYrRow('rai')">+ Add expense row for Rai</button>
     </div>
@@ -448,6 +512,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <span class="card-arrow open" id="arr-c-neil">▶</span>
     </div>
     <div class="card-body" id="c-neil">
+      <div class="msr-bar" id="neil-summary" style="margin-bottom:8px"></div>
       <div class="yr-wrap"><table class="yr-tbl" id="neil-tbl"></table></div>
       <button class="add-btn" onclick="addYrRow('neil')">+ Add expense row for Neil</button>
     </div>
@@ -458,6 +523,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <!-- ── TAB: MSR ── -->
 <div class="tab-pane" id="t-msr">
+<div class="tab-flow-bar" id="flow-msr"></div>
 <div class="section">
   <div class="sec-title"><span class="sec-num">04</span> MSR premium timeline</div>
   <div class="card">
@@ -485,7 +551,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div><!-- end .page -->
 
 <script>
-const YEARS=[2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
+let YEARS=[2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
 const SAL_ANNUAL=4080000;
 
 // Default RSU vesting schedule — 2625 units total
@@ -523,7 +589,7 @@ let raiRows=[
   {id:1,name:'Rent',rate:1800,mo:{2026:7,2027:12,2028:6}},
   {id:2,name:'Living expenses',rate:1500,mo:{2026:7,2027:12,2028:6}},
   {id:3,name:'Travel',rate:500,mo:{2026:7,2027:12,2028:6}},
-  {id:4,name:'Tuition Fees',rate:2000,mo:{2026:0,2027:12,2028:6}},
+  {id:4,name:'Tuition Fees',rate:2000,mo:{2026:6,2027:6,2028:0}},
 ];
 let neilRows=[
   {id:10,name:'Rent',rate:1800,mo:{2026:7,2027:12,2028:12,2029:12,2030:6}},
@@ -542,6 +608,39 @@ let monthlyExp=[
 let quarterlyExp=[{id:101,name:'Tukun',val:50000},{id:102,name:'Misc Travel',val:200000}];
 let nxtId=300;
 let swpRows=[];
+
+let oneOffRows=[
+  {id:200,name:'Marriage - Rai',amount:1e7,year:2030},
+  {id:201,name:'Marriage - Neil',amount:1e7,year:2032},
+];
+
+function renderOneOffTable(){
+  const tb=g('oneoff-body');if(!tb)return;tb.innerHTML='';
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  oneOffRows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="amt" type="text" value="${r.name}" style="width:160px;text-align:left" onchange="updOneOff(${r.id},'name',this.value)"></td>`+
+      `<td style="text-align:right"><input class="amt" type="number" value="${(r.amount/1e7).toFixed(1)}" step="0.1" min="0" style="width:80px" onchange="updOneOff(${r.id},'amount',+this.value*1e7)"></td>`+
+      `<td style="text-align:right"><select class="swp-sel" onchange="updOneOff(${r.id},'year',+this.value)">${Array.from({length:25},(_,i)=>2026+i).map(y=>`<option value="${y}"${r.year===y?' selected':''}>${y}</option>`).join('')}</select></td>`+
+      `<td><button class="del-btn" onclick="delOneOff(${r.id})">&times;</button></td>`;
+    tb.appendChild(tr);
+  });
+  const tot=oneOffRows.reduce((s,r)=>s+r.amount,0);
+  if(g('oneoff-meta'))g('oneoff-meta').textContent=oneOffRows.length+' items · ₹'+(tot/1e7).toFixed(1)+'Cr total';
+}
+function addOneOff(){
+  oneOffRows.push({id:nxtId++,name:'New expense',amount:1e7,year:2030});
+  renderOneOffTable();update();
+}
+function updOneOff(id,key,val){
+  const r=oneOffRows.find(x=>x.id===id);
+  if(r)r[key]=(key==='name')?val:+val;
+  renderOneOffTable();update();
+}
+function delOneOff(id){
+  oneOffRows=oneOffRows.filter(x=>x.id!==id);
+  renderOneOffTable();update();
+}
 
 const SWP_ASSETS=[
   {v:'fa',l:'Fine Advice'},{v:'gw',l:'Growealth'},{v:'prop',l:'Property'},
@@ -631,6 +730,8 @@ function getP(){
     grat:(+g('grat').value||50)*1e5,
     gratdelay:+g('gratdelay').value||6,
     ret:+g('ret').value/100,
+    infl:+g('infl').value/100||0.03,
+    endYr:+(g('end-yr')?g('end-yr').value:2035)||2035,
     usdinr:+(g('usdinr-n')?g('usdinr-n').value:84)||84,
     gbpinr:+(g('gbpinr-n')?g('gbpinr-n').value:107)||107,
     sgdinr:+(g('sgdinr-n')?g('sgdinr-n').value:63)||63,
@@ -687,6 +788,7 @@ function totalAssets(p){
 }
 
 function buildYears(p){
+  YEARS=Array.from({length:p.endYr-2025},(_,i)=>2026+i);
   let inrBal=p.inrc+p.inreq;
   const gyr=gratYear(p);
 
@@ -739,15 +841,17 @@ function buildYears(p){
     const msrI=yr===2029?(hasSWP('msr')?residual('msr'):p.msr*p.sgdinr):0;
     const msrMo=p.msrMo[yr]||0;
     const msrO=msrMo*5000*p.sgdinr;
-    const india=totM()*12+totQ()*4;
-    const rai=personYrGBP(raiRows,yr)*p.gbpinr;
-    const neil=personYrGBP(neilRows,yr)*p.gbpinr;
+    const inflFactor=Math.pow(1+p.infl,yr-2026);
+    const india=(totM()*12+totQ()*4)*inflFactor;
+    const rai=personYrGBP(raiRows,yr)*p.gbpinr*inflFactor;
+    const neil=personYrGBP(neilRows,yr)*p.gbpinr*inflFactor;
+    const oneOff=oneOffRows.reduce((s,r)=>s+(yr===r.year?r.amount:0),0);
     const totalIn=sal+rsu+faI+gwI+prop+absliI+gratI+sgdLiq+msrI+ret+swpIncome;
-    const totalOut=msrO+india+rai+neil;
+    const totalOut=msrO+india+rai+neil+oneOff;
     const net=totalIn-totalOut;
     const close=open+net;
     inrBal=close;
-    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,swpIncome,net,close};
+    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,swpIncome,oneOff,net,close};
   });
 }
 
@@ -835,6 +939,14 @@ function renderYrTbl(tblId,rows,yrCols,person){
 
   html+=`</tbody>`;
   tbl.innerHTML=html;
+
+  // Summary bar
+  const summId=tblId.replace('-tbl','-summary');
+  const summEl=g(summId);
+  if(summEl){
+    const totGBP=yrCols.reduce((s,y)=>s+rows.reduce((ss,r)=>ss+rowAnnualGBP(r,y),0),0);
+    summEl.innerHTML=`Total across all years: <b>${fG(totGBP)}</b> GBP · <b>${fI(totGBP*p.gbpinr)}</b> INR`;
+  }
 }
 
 function updYrRate(person,id,val){
@@ -908,8 +1020,8 @@ function switchTab(id){
   document.getElementById(id).classList.add('active');
   const btn=document.querySelector(`.tab-btn[data-tab="${id}"]`);
   if(btn)btn.classList.add('active');
-  // Re-render chart when navigating back to summary (canvas may have been hidden)
-  if(id==='t-summary'){if(cfChart){cfChart.destroy();cfChart=null;}update();}
+  // Re-render chart when navigating back to cashflow (canvas may have been hidden)
+  if(id==='t-cashflow'){if(cfChart){cfChart.destroy();cfChart=null;}update();}
 }
 
 function toggleCard(id){
@@ -927,6 +1039,7 @@ function renderAllTables(){
   renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
   renderRSUTable();
   renderSWPTable();
+  renderOneOffTable();
 }
 
 function toggleEmpl(){
@@ -955,6 +1068,7 @@ function update(){
   st('v-gbpinr',p.gbpinr.toFixed(1));
   st('v-sgdinr',p.sgdinr.toFixed(1));
   st('v-ret',(p.ret*100).toFixed(1)+'%');
+  st('v-infl',(p.infl*100).toFixed(1)+'%');
 
   // Context panel labels
   st('v-fa','₹'+(p.fa/1e7).toFixed(1)+'Cr');
@@ -1003,26 +1117,35 @@ function update(){
   const a=totalAssets(p);
   const ydata=buildYears(p);
 
-  // Asset grid
+  // Asset table
   const gyr=gratYear(p);
-  const faGain=Math.max(0,p.fa-p.facoa),faTax=faGain*p.fatax,faNet=p.fa-faTax;
-  const gwGain=Math.max(0,p.gw-p.gwcoa),gwTax=gwGain*p.gwtax,gwNet=p.gw-gwTax;
-  const emplLabel=p.emplOn?`Active until ${String(p.emplEndMo).padStart(2,'0')}/${p.emplEndYr}`:'OFF';
-  const items=[
-    {name:'RSU ('+totalRSUUnits().toLocaleString()+' units)',val:fI(a.rsu),sub:`$${p.ctsh} × ₹${p.usdinr.toFixed(0)} · post 15% tax · ${emplLabel}`,dim:!p.emplOn},
-    {name:'Salary',val:p.emplOn?fI(SAL_ANNUAL/12*emplMonthsInYear(p.emplEndYr,p)+SAL_ANNUAL*(p.emplEndYr-2026)):'OFF',sub:emplLabel,dim:!p.emplOn},
-    {name:'Fine Advice',val:fI(faNet*p.tFa),sub:`MV ₹${(p.fa/1e7).toFixed(1)}Cr − COA ₹${(p.facoa/1e7).toFixed(1)}Cr → tax ₹${(faTax/1e7).toFixed(2)}Cr`,dim:!p.tFa},
-    {name:'Growealth',val:fI(gwNet*p.tGw),sub:`MV ₹${(p.gw/1e5).toFixed(0)}L − COA ₹${(p.gwcoa/1e5).toFixed(0)}L → tax ₹${(gwTax/1e5).toFixed(1)}L`,dim:!p.tGw},
-    {name:'Property LK-866',val:fI(p.propval),sub:`Sale in ${p.propyr} · post-tax`},
-    {name:'ABSLI',val:fI(p.absli),sub:`Maturity ${p.absliyr}`},
-    {name:'Gratuity + PF',val:fI(p.grat),sub:`Available ${gyr} (${p.gratdelay}mo after salary end)`},
-    {name:'INR equity',val:fI(p.inreq),sub:'₹14L · earns '+Math.round(p.ret*100)+'% return'},
-    {name:'INR opening cash',val:fI(p.inrc),sub:'₹17L · earns '+Math.round(p.ret*100)+'% return'},
-    {name:'MSR corpus',val:fI(p.msr*p.sgdinr),sub:`S$${(p.msr/1000).toFixed(0)}K × ₹${p.sgdinr.toFixed(2)}`},
-    {name:'SGD equity',val:fI(p.eq*p.sgdinr),sub:`S$${(p.eq/1000).toFixed(0)}K × ₹${p.sgdinr.toFixed(2)}`},
-    {name:'SGD cash',val:fI(p.sgdc*p.sgdinr),sub:`S$${(p.sgdc/1000).toFixed(0)}K × ₹${p.sgdinr.toFixed(2)}`},
+  const assetRows=[
+    {name:'Fine Advice',base:`₹${(p.fa/1e7).toFixed(1)}Cr`,tax:`₹${(Math.max(0,p.fa-p.facoa)*p.fatax/1e7).toFixed(2)}Cr`,net:fI(netTax(p.fa,p.facoa,p.fatax)*p.tFa),liqYr:'2026',dim:false},
+    {name:'Growealth',base:`₹${(p.gw/1e5).toFixed(0)}L`,tax:`₹${(Math.max(0,p.gw-p.gwcoa)*p.gwtax/1e5).toFixed(1)}L`,net:fI(netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw),liqYr:'2026',dim:false},
+    {name:'Property LK-866',base:`₹${(p.propval/1e5).toFixed(0)}L`,tax:'—',net:fI(p.propval),liqYr:String(p.propyr),dim:false},
+    {name:'ABSLI',base:`₹${(p.absli/1e5).toFixed(0)}L`,tax:'—',net:fI(p.absli),liqYr:String(p.absliyr),dim:false},
+    {name:'Gratuity + PF',base:`₹${(p.grat/1e5).toFixed(0)}L`,tax:'—',net:fI(p.grat),liqYr:String(gyr),dim:false},
+    {name:'MSR corpus',base:`S$${(p.msr/1000).toFixed(0)}K`,tax:'—',net:fI(p.msr*p.sgdinr),liqYr:'2029',dim:false},
+    {name:'SGD equity',base:`S$${(p.eq/1000).toFixed(0)}K`,tax:'—',net:fI(p.eq*p.sgdinr),liqYr:'2026',dim:false},
+    {name:'SGD cash',base:`S$${(p.sgdc/1000).toFixed(0)}K`,tax:'—',net:fI(p.sgdc*p.sgdinr),liqYr:'2026',dim:false},
+    {name:'INR cash',base:`₹${(p.inrc/1e5).toFixed(0)}L`,tax:'—',net:fI(p.inrc),liqYr:'2026',dim:false},
+    {name:'INR equity',base:`₹${(p.inreq/1e5).toFixed(0)}L`,tax:'—',net:fI(p.inreq),liqYr:'2026',dim:false},
+    {name:'RSU ('+totalRSUUnits()+' units)',base:`${totalRSUUnits().toLocaleString()} × $${p.ctsh}`,tax:'15%',net:fI(a.rsu),liqYr:p.emplOn?`${2026}–${p.emplEndYr}`:'OFF',dim:!p.emplOn},
+    {name:'Salary',base:`₹${(SAL_ANNUAL/12/1e3).toFixed(0)}K/mo`,tax:'—',net:p.emplOn?fI(SAL_ANNUAL*(p.emplEndYr-2026)+SAL_ANNUAL/12*p.emplEndMo):'OFF',liqYr:p.emplOn?`${2026}–${p.emplEndYr}`:'OFF',dim:!p.emplOn},
   ];
-  g('asset-grid').innerHTML=items.map(it=>`<div class="asset-card" style="${it.dim?'opacity:.35':''}"><div class="asset-name">${it.name}</div><div class="asset-val">${it.val}</div><div class="asset-sub">${it.sub||''}</div></div>`).join('');
+  const atEl=g('asset-grid');
+  if(atEl){
+    atEl.innerHTML=`<table class="exp-table" style="font-size:11px"><thead><tr>
+      <th>Asset</th><th style="text-align:right">Base</th><th style="text-align:right">Tax</th>
+      <th style="text-align:right;color:var(--accent)">Net (₹)</th><th style="text-align:center">Liquid</th>
+    </tr></thead><tbody>${assetRows.map(r=>`<tr style="${r.dim?'opacity:.4':''}">
+      <td class="nc">${r.name}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${r.base}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--red)">${r.tax}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent)">${r.net}</td>
+      <td style="text-align:center;font-size:10px;color:var(--green);font-family:'DM Mono',monospace">${r.liqYr}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
 
   // Re-render GBP grids (INR row depends on gbpinr)
   renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
@@ -1118,12 +1241,30 @@ function update(){
     {l:'India expenses',cls:'out',v:ydata.map(d=>'('+fI(d.india)+')')},
     {l:'Rai / Trisha (GBP→INR)',cls:'out',v:ydata.map(d=>d.rai>0?'('+fI(d.rai)+')':'—')},
     {l:'Neil / Ayush (GBP→INR)',cls:'out',v:ydata.map(d=>d.neil>0?'('+fI(d.neil)+')':'—')},
+    {l:'One-off expenses',cls:'out',v:ydata.map(d=>d.oneOff>0?'('+fI(d.oneOff)+')':'—')},
     {l:'Net cash flow',cls:'net',v:ydata.map(d=>`<span class="${d.net>=0?'pos':'neg'}">${d.net<0?'('+fI(Math.abs(d.net))+')':fI(d.net)}</span>`)},
     {l:'Closing balance',cls:'bal',b:true,v:ydata.map(d=>`<span class="${d.close>=0?'pos':'neg'}">${d.close<0?'('+fI(Math.abs(d.close))+')':fI(d.close)}</span>`)},
   ];
   g('tl-tbl').innerHTML=
     `<tr><th class="rh">Line item</th>${YEARS.map((y,i)=>`<th class="${i===0?'yh':''}">${y}</th>`).join('')}</tr>`
     +tRows.map(r=>`<tr class="${r.cls}"><td class="rh${r.b?' b':''}">${r.l}</td>${r.v.map((v,i)=>`<td class="${i===0?'yh':''}">${v}</td>`).join('')}</tr>`).join('');
+
+  // Tab flow summary bars
+  function flowBar(id,label,vals,fmt){
+    const el=g(id);if(!el)return;
+    const yr_vals=YEARS.map((y,i)=>({y,v:vals[i]})).filter(x=>x.v!==0);
+    if(!yr_vals.length){el.style.display='none';return;}
+    el.style.display='';
+    el.innerHTML=`<table><tr><td class="flow-lbl">${label}</td>${yr_vals.map(x=>`<th>${x.y}</th>`).join('')}</tr>`+
+      `<tr><td></td>${yr_vals.map(x=>`<td>${fmt(x.v)}</td>`).join('')}</tr></table>`;
+  }
+  flowBar('flow-assets','Asset inflows (₹)',ydata.map(d=>d.faI+d.gwI+d.prop+d.absliI+d.gratI+d.sgdLiq+d.msrI),v=>fI(v));
+  flowBar('flow-rsu','RSU vesting (₹)',ydata.map(d=>d.rsu),v=>fI(v));
+  flowBar('flow-swp','SWP income (₹)',ydata.map(d=>d.swpIncome),v=>fI(v));
+  flowBar('flow-expenses','India expenses (₹)',ydata.map(d=>d.india),v=>fI(v));
+  flowBar('flow-gbp','GBP expenses (₹)',ydata.map(d=>d.rai+d.neil),v=>fI(v));
+  flowBar('flow-msr','MSR premium out (₹)',ydata.map(d=>d.msrO),v=>fI(v));
+  flowBar('flow-oneoff','One-off expenses (₹)',ydata.map(d=>d.oneOff),v=>fI(v));
 }
 
 function toggleTheme(){
@@ -1139,7 +1280,24 @@ function syncPair(sId,nId){
   sl.addEventListener('input',()=>{inp.value=sl.value;update()});
   inp.addEventListener('input',()=>{sl.value=inp.value;update()});
 }
-['ctsh','ret'].forEach(id=>syncPair(id,id+'-n'));
+['ctsh','ret','infl'].forEach(id=>syncPair(id,id+'-n'));
+
+// Populate employment end dropdown: Jun 2026 → Oct 2034
+(function(){
+  const sel=g('empl-end');if(!sel)return;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(let yr=2026;yr<=2034;yr++){
+    const startMo=(yr===2026?5:0); // 0-based, Jun=5
+    const endMo=(yr===2034?9:11);  // Oct=9
+    for(let m=startMo;m<=endMo;m++){
+      const val=String(m+1).padStart(2,'0')+String(yr).slice(2);
+      const opt=document.createElement('option');
+      opt.value=val;opt.textContent=months[m]+' '+yr;
+      if(val==='1228')opt.selected=true;
+      sel.appendChild(opt);
+    }
+  }
+})();
 
 renderAllTables();
 update();

@@ -315,10 +315,10 @@ document.addEventListener('DOMContentLoaded', function() {{
         .then(r => r.json())
         .then(d => {{
             if (d.usdinr) {{
-                setSyncPair('usdinr', d.usdinr);
-                setSyncPair('gbpinr', d.gbpinr);
-                setSyncPair('sgdinr', d.sgdinr);
-                // Show LIVE badge
+                setVal('usdinr-n', d.usdinr);
+                setVal('gbpinr-n', d.gbpinr);
+                setVal('sgdinr-n', d.sgdinr);
+                // Show LIVE badge in forex footnote bar
                 const badge = document.getElementById('forex-live-badge');
                 if (badge) badge.style.display = '';
                 if (typeof update === 'function') update();

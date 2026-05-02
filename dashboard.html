@@ -63,6 +63,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px;color:var(--text2);white-space:nowrap;font-family:'Inter',sans-serif;flex-shrink:0;margin-left:auto}
 .theme-btn:hover{border-color:var(--accent);color:var(--accent)}
 
+/* ── FOREX FOOTNOTE BAR ── */
+.forex-bar{background:var(--bg3);border-bottom:1px solid var(--border);padding:4px 24px;font-size:10px;color:var(--text3);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.forex-bar .fx-item{display:flex;align-items:center;gap:4px}
+.forex-bar .fx-lbl{color:var(--text3)}
+.forex-bar .fx-val{font-family:'DM Mono',monospace;color:var(--text2);font-weight:500}
+.forex-bar .fx-note{color:var(--text3);font-style:italic;margin-left:auto}
+
 /* ── TABS ── */
 .tab-nav{background:var(--bg2);border-bottom:2px solid var(--border);padding:0 24px;display:flex;gap:0;overflow-x:auto;position:sticky;top:0;z-index:100}
 .tab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:11px 18px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;margin-bottom:-2px;transition:all .15s;letter-spacing:.01em}
@@ -184,6 +191,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   </div>
 </div>
 
+<!-- Hidden forex inputs (values set by live API; read by getP()) -->
+<div style="display:none">
+  <input type="number" id="usdinr-n" value="84.0">
+  <input type="number" id="gbpinr-n" value="107.0">
+  <input type="number" id="sgdinr-n" value="63.0">
+</div>
+
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-inner">
@@ -202,37 +216,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="tb-sep"></div>
 
     <div class="tb-group">
-      <span class="tb-lbl">USD/INR</span>
-      <div class="tb-ctrl">
-        <input type="range" id="usdinr" min="75" max="115" step="0.5" value="94.19">
-        <input type="number" id="usdinr-n" value="94.19" step="0.5">
-      </div>
-      <span class="tb-val" id="v-usdinr">94.2</span>
-    </div>
-
-    <div class="tb-group">
-      <span class="tb-lbl">GBP/INR</span>
-      <div class="tb-ctrl">
-        <input type="range" id="gbpinr" min="95" max="145" step="0.5" value="119.44">
-        <input type="number" id="gbpinr-n" value="119.44" step="0.5">
-      </div>
-      <span class="tb-val" id="v-gbpinr">119.4</span>
-    </div>
-
-    <div class="tb-group">
-      <span class="tb-lbl">SGD/INR</span>
-      <div class="tb-ctrl">
-        <input type="range" id="sgdinr" min="58" max="92" step="0.5" value="73.76">
-        <input type="number" id="sgdinr-n" value="73.76" step="0.5">
-      </div>
-      <span class="tb-val" id="v-sgdinr">73.8</span>
-    </div>
-
-    <span class="live-badge" id="forex-live-badge" style="display:none" title="Rates fetched live from frankfurter.app">🟢 LIVE</span>
-
-    <div class="tb-sep"></div>
-
-    <div class="tb-group">
       <span class="tb-lbl">Return %</span>
       <div class="tb-ctrl">
         <input type="range" id="ret" min="0" max="15" step="0.5" value="7">
@@ -244,15 +227,23 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="tb-sep"></div>
 
     <div class="tog-group">
-      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()"> Salary &amp; RSU</label>
+      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">Salary &amp; RSU</label>
       <span class="tb-lbl" style="margin-left:4px">End MMYY</span>
       <input type="text" id="empl-end" value="1228" maxlength="4" placeholder="MMYY" style="width:52px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:3px 5px;border-radius:4px;text-align:center" oninput="update()">
-      <label class="tog-chip on" id="chip-fa"><input type="checkbox" id="t-fa" checked onchange="toggleChip('fa')"> Fine Advice</label>
-      <label class="tog-chip on" id="chip-gw"><input type="checkbox" id="t-gw" checked onchange="toggleChip('gw')"> Growealth</label>
     </div>
 
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">Dark mode</button>
   </div>
+</div>
+
+<!-- FOREX FOOTNOTE BAR -->
+<div class="forex-bar">
+  <span style="font-weight:600;color:var(--text2)">Exchange rates</span>
+  <span class="fx-item"><span class="fx-lbl">USD/INR</span> <span class="fx-val" id="v-usdinr">—</span></span>
+  <span class="fx-item"><span class="fx-lbl">GBP/INR</span> <span class="fx-val" id="v-gbpinr">—</span></span>
+  <span class="fx-item"><span class="fx-lbl">SGD/INR</span> <span class="fx-val" id="v-sgdinr">—</span></span>
+  <span id="forex-live-badge" class="live-badge" style="display:none" title="Rates fetched live from frankfurter.app">🟢 LIVE</span>
+  <span class="fx-note">Rates auto-updated from frankfurter.app · used in all calculations</span>
 </div>
 
 <!-- TAB NAVIGATION -->
@@ -640,9 +631,11 @@ function getP(){
     grat:(+g('grat').value||50)*1e5,
     gratdelay:+g('gratdelay').value||6,
     ret:+g('ret').value/100,
-    usdinr:+g('usdinr').value, gbpinr:+g('gbpinr').value, sgdinr:+g('sgdinr').value,
+    usdinr:+(g('usdinr-n')?g('usdinr-n').value:84)||84,
+    gbpinr:+(g('gbpinr-n')?g('gbpinr-n').value:107)||107,
+    sgdinr:+(g('sgdinr-n')?g('sgdinr-n').value:63)||63,
     emplOn, emplEndMo, emplEndYr,
-    tFa:g('t-fa').checked?1:0, tGw:g('t-gw').checked?1:0,
+    tFa:1, tGw:1,
   };
 }
 
@@ -1146,7 +1139,7 @@ function syncPair(sId,nId){
   sl.addEventListener('input',()=>{inp.value=sl.value;update()});
   inp.addEventListener('input',()=>{sl.value=inp.value;update()});
 }
-['ctsh','usdinr','gbpinr','sgdinr','ret'].forEach(id=>syncPair(id,id+'-n'));
+['ctsh','ret'].forEach(id=>syncPair(id,id+'-n'));
 
 renderAllTables();
 update();

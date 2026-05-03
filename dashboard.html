@@ -891,6 +891,12 @@ function getP(){
   // Get SGD/INR rate for currency conversion
   const sgdinrRate=parseFloat(g('sgdinr-n')?g('sgdinr-n').value:63);
 
+  // Read salary configuration from context bar
+  const salaryGross=+(g('salary-gross')?g('salary-gross').value:9600000);
+  const salaryTaxRate=+(g('salary-tax-rate')?g('salary-tax-rate').value:30)/100;
+  const salaryTaxAmount=salaryGross*salaryTaxRate;
+  const salaryNet=salaryGross-salaryTaxAmount;
+
   return{
     ctsh:+g('ctsh').value,
     // All values stored as full numbers; convert SGD to INR if needed
@@ -925,6 +931,8 @@ function getP(){
     usdinr:+(g('usdinr-n')?g('usdinr-n').value:84)||84,
     gbpinr:+(g('gbpinr-n')?g('gbpinr-n').value:107)||107,
     sgdinr:sgdinrRate,
+    // Salary configuration - read from context bar input controls
+    salaryGross, salaryTaxRate, salaryTaxAmount, salaryNet,
     emplOn, emplEndMo, emplEndYr,
     tFa:1, tGw:1,
   };
@@ -1109,7 +1117,7 @@ function buildYears(p){
     const open=inrBal;
     const ret=open>0?open*p.ret:0;
     const salMo=emplMonthsInYear(yr,p);
-    const sal=(SAL_ANNUAL/12)*salMo;
+    const sal=(p.salaryGross/12)*salMo;  // Use salary from context bar input control
     const rsuUnits=rsuInYear(yr,p);
     const rsu=rsuUnits*p.ctsh*0.85*p.usdinr;
     // One-time inflows — residual for SWP assets, full value otherwise (using dynamic liquidity years)

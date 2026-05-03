@@ -1327,30 +1327,54 @@ function update(){
 
   // Asset table
   const gyr=gratYear(p);
-  const assetRows=[
-    {name:'Fine Advice',base:`₹${(p.fa/1e7).toFixed(1)}Cr`,tax:`₹${(Math.max(0,p.fa-p.facoa)*p.fatax/1e7).toFixed(2)}Cr`,net:fI(netTax(p.fa,p.facoa,p.fatax)*p.tFa),liqYr:'2026',dim:false},
-    {name:'Growealth',base:`₹${(p.gw/1e5).toFixed(0)}L`,tax:`₹${(Math.max(0,p.gw-p.gwcoa)*p.gwtax/1e5).toFixed(1)}L`,net:fI(netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw),liqYr:'2026',dim:false},
-    {name:'Property LK-866',base:`₹${(p.propval/1e5).toFixed(0)}L`,tax:'—',net:fI(p.propval),liqYr:String(p.propyr),dim:false},
-    {name:'ABSLI',base:`₹${(p.absli/1e5).toFixed(0)}L`,tax:'—',net:fI(p.absli),liqYr:String(p.absliyr),dim:false},
-    {name:'Gratuity + PF',base:`₹${(p.grat/1e5).toFixed(0)}L`,tax:'—',net:fI(p.grat),liqYr:String(gyr),dim:false},
-    {name:'MSR corpus',base:`S$${(p.msr/1000).toFixed(0)}K`,tax:'—',net:fI(p.msr*p.sgdinr),liqYr:'2029',dim:false},
-    {name:'SGD equity',base:`S$${(p.eq/1000).toFixed(0)}K`,tax:'—',net:fI(p.eq*p.sgdinr),liqYr:'2026',dim:false},
-    {name:'SGD cash',base:`S$${(p.sgdc/1000).toFixed(0)}K`,tax:'—',net:fI(p.sgdc*p.sgdinr),liqYr:'2026',dim:false},
-    {name:'INR cash',base:`₹${(p.inrc/1e5).toFixed(0)}L`,tax:'—',net:fI(p.inrc),liqYr:'2026',dim:false},
-    {name:'INR equity',base:`₹${(p.inreq/1e5).toFixed(0)}L`,tax:'—',net:fI(p.inreq),liqYr:'2026',dim:false},
+  // Asset table with detailed values and liquidity matrix
+  const assetData=[
+    {name:'Fine Advice',base:`₹${(p.fa/1e7).toFixed(1)}Cr`,inr:p.fa,coa:p.facoa,taxRate:p.fatax,liqYr:2026},
+    {name:'Growealth',base:`₹${(p.gw/1e5).toFixed(0)}L`,inr:p.gw,coa:p.gwcoa,taxRate:p.gwtax,liqYr:2026},
+    {name:'Property LK-866',base:`₹${(p.propval/1e5).toFixed(0)}L`,inr:p.propval,coa:p.propval,taxRate:0.15,liqYr:p.propyr},
+    {name:'ABSLI',base:`₹${(p.absli/1e5).toFixed(0)}L`,inr:p.absli,coa:p.absli,taxRate:0.13,liqYr:p.absliyr},
+    {name:'Gratuity + PF',base:`₹${(p.grat/1e5).toFixed(0)}L`,inr:p.grat,coa:p.grat*0.1,taxRate:0.1,liqYr:gyr},
+    {name:'MSR corpus',base:`S$${(p.msr/1000).toFixed(0)}K`,inr:p.msr*p.sgdinr,coa:0,taxRate:0,liqYr:2029},
+    {name:'SGD equity',base:`S$${(p.eq/1000).toFixed(0)}K`,inr:p.eq*p.sgdinr,coa:0,taxRate:0,liqYr:2026},
+    {name:'SGD cash',base:`S$${(p.sgdc/1000).toFixed(0)}K`,inr:p.sgdc*p.sgdinr,coa:0,taxRate:0,liqYr:2026},
+    {name:'INR cash',base:`₹${(p.inrc/1e5).toFixed(0)}L`,inr:p.inrc,coa:0,taxRate:0,liqYr:2026},
+    {name:'INR equity',base:`₹${(p.inreq/1e5).toFixed(0)}L`,inr:p.inreq,coa:p.inreq*0.5,taxRate:0.15,liqYr:2026},
   ];
+
   const atEl=g('asset-grid');
   if(atEl){
-    atEl.innerHTML=`<table class="exp-table" style="font-size:11px"><thead><tr>
-      <th>Asset</th><th style="text-align:right">Base</th><th style="text-align:right">Tax</th>
-      <th style="text-align:right;color:var(--accent)">Net (₹)</th><th style="text-align:center">Liquid</th>
-    </tr></thead><tbody>${assetRows.map(r=>`<tr style="${r.dim?'opacity:.4':''}">
-      <td class="nc">${r.name}</td>
-      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${r.base}</td>
-      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--red)">${r.tax}</td>
-      <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent)">${r.net}</td>
-      <td style="text-align:center;font-size:10px;color:var(--green);font-family:'DM Mono',monospace">${r.liqYr}</td>
-    </tr>`).join('')}</tbody></table>`;
+    const yearRange=Array.from({length:p.endYr-2025},(_,i)=>2026+i);
+    const headerYears=yearRange.map(y=>`<th style="min-width:35px;text-align:center;font-size:9px">${y}</th>`).join('');
+
+    const assetRows=assetData.map(a=>{
+      const tax=Math.max(0,a.inr-a.coa)*a.taxRate;
+      const net=a.inr-tax;
+      const yMarks=yearRange.map(y=>y===a.liqYr?'<td style="text-align:center;color:var(--green);font-weight:600">Y</td>':'<td style="text-align:center;color:var(--border)">—</td>').join('');
+      return `<tr>
+        <td class="nc" style="min-width:130px">${a.name}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;min-width:90px">${a.base}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;min-width:90px">${fI(a.inr)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;min-width:90px">${fI(a.coa)}</td>
+        <td style="text-align:center;font-family:'DM Mono',monospace;font-size:10px;min-width:50px">${(a.taxRate*100).toFixed(0)}%</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--red);min-width:90px">${fI(tax)}</td>
+        <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent);min-width:90px">${fI(net)}</td>
+        ${yMarks}
+      </tr>`;
+    }).join('');
+
+    atEl.innerHTML=`<table class="exp-table" style="font-size:11px;overflow-x:auto"><thead><tr>
+      <th style="min-width:130px">Asset</th>
+      <th style="text-align:right;min-width:90px">Base Value</th>
+      <th style="text-align:right;min-width:90px">Value in INR</th>
+      <th style="text-align:right;min-width:90px">Cost of Acq.</th>
+      <th style="text-align:center;min-width:50px">Tax %</th>
+      <th style="text-align:right;min-width:90px;color:var(--red)">Tax</th>
+      <th style="text-align:right;min-width:90px;color:var(--accent)">Net After Tax</th>
+      <th colspan="${yearRange.length}" style="text-align:center;padding-left:20px"><strong>Liquidity in</strong></th>
+    </tr><tr style="border-bottom:2px solid var(--border)">
+      <th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+      ${headerYears}
+    </tr></thead><tbody>${assetRows}</tbody></table>`;
   }
 
   // Re-render GBP grids (INR row depends on gbpinr)

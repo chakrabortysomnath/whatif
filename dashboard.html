@@ -273,8 +273,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 <div class="tab-nav">
   <button class="tab-btn active" data-tab="t-cashflow" onclick="switchTab('t-cashflow')">💰 Cash Flow</button>
   <button class="tab-btn" data-tab="t-assets" onclick="switchTab('t-assets')">💼 Assets</button>
-  <button class="tab-btn" data-tab="t-rsu" onclick="switchTab('t-rsu')">📋 RSU</button>
-  <button class="tab-btn" data-tab="t-swp" onclick="switchTab('t-swp')">📈 SWP</button>
+  <button class="tab-btn" data-tab="t-income" onclick="switchTab('t-income')">📈 Income</button>
+  <button class="tab-btn" data-tab="t-swp" onclick="switchTab('t-swp')">📊 SWP</button>
   <button class="tab-btn" data-tab="t-expenses" onclick="switchTab('t-expenses')">🏠 Expenses</button>
   <button class="tab-btn" data-tab="t-oneoff" onclick="switchTab('t-oneoff')">🎯 One-off</button>
   <button class="tab-btn" data-tab="t-gbp" onclick="switchTab('t-gbp')">🇬🇧 Rai &amp; Neil</button>
@@ -357,32 +357,83 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div>
 </div>
 
-<!-- ── TAB: RSU ── -->
-<div class="tab-pane" id="t-rsu">
-<div class="tab-flow-bar" id="flow-rsu"></div>
+<!-- ── TAB: Income ── -->
+<div class="tab-pane" id="t-income">
+<div class="tab-flow-bar" id="flow-income"></div>
 <div class="section">
-  <div class="sec-title"><span class="sec-num">RSU</span> RSU vesting schedule</div>
+  <div class="sec-title"><span class="sec-num">INC</span> Income configuration &amp; projection</div>
+
+  <!-- SECTION A: Salary Configuration -->
   <div class="card">
-    <div class="card-hdr" onclick="toggleCard('c-rsu')">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="card-title">RSU vesting schedule</span>
-        <span class="card-meta">Total: <span id="rsu-total">2,625</span> units · Post-tax: <span id="rsu-inr-val">—</span></span>
-      </div>
-      <span class="card-arrow open" id="arr-c-rsu">▶</span>
+    <div class="card-hdr" onclick="toggleCard('c-salary')">
+      <span class="card-title">Salary &amp; employment</span>
+      <span class="card-arrow open" id="arr-c-salary">▶</span>
     </div>
-    <div class="card-body" id="c-rsu">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-        <button class="add-btn" style="width:auto;margin:0;padding:4px 10px" onclick="addRSURow()">+ Add tranche</button>
+    <div class="card-body" id="c-salary">
+      <div style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px"><strong>Status:</strong> <span id="sal-status" style="color:var(--green)">Employment ON</span></div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px"><strong>Annual salary:</strong> ₹96L (₹8L/month)</div>
+        <div style="font-size:11px;color:var(--text2)"><strong>Employment period:</strong> June 2026 → <span id="sal-end-disp">Dec 2034</span> (<span id="sal-years-disp">8.5</span> years)</div>
       </div>
-      <div style="overflow-x:auto">
-        <table class="exp-table">
-          <thead><tr><th>Vesting date</th><th style="width:100px;text-align:right">Units</th><th style="width:110px;text-align:right">Value (INR)</th><th style="width:24px"></th></tr></thead>
-          <tbody id="rsu-body"></tbody>
-          <tfoot><tr class="tot-row"><td>Total</td><td id="rsu-units-tot" style="text-align:right">—</td><td id="rsu-val-tot" style="text-align:right">—</td><td></td></tr></tfoot>
-        </table>
-      </div>
+      <div class="note">Salary configuration is controlled by the "Employment end" dropdown in the top bar. Switch to desired end date, and this display will update automatically.</div>
     </div>
   </div>
+
+  <!-- SECTION B: RSU Vesting Schedule -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-rsu-sched')">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="card-title">RSU vesting schedule</span>
+        <span class="card-meta">Total: <span id="rsu-total">2,625</span> units</span>
+      </div>
+      <span class="card-arrow open" id="arr-c-rsu-sched">▶</span>
+    </div>
+    <div class="card-body" id="c-rsu-sched">
+      <div class="group-lbl">Current schedule (Jun 2026 → Mar 2029)</div>
+      <div style="overflow-x:auto;margin-bottom:16px">
+        <table class="exp-table">
+          <thead><tr><th>Vesting date</th><th style="width:100px;text-align:right">Units</th><th style="width:110px;text-align:right">Value @ $<span id="ctsh-display">54</span></th><th style="width:24px"></th></tr></thead>
+          <tbody id="rsu-body"></tbody>
+          <tfoot><tr class="tot-row"><td>Current total</td><td id="rsu-units-tot" style="text-align:right">—</td><td id="rsu-val-tot" style="text-align:right">—</td><td></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="group-lbl">Projected schedule (Q2 2029 → <span id="proj-end-disp">Dec 2034</span>)</div>
+      <div style="overflow-x:auto">
+        <table class="exp-table">
+          <thead><tr><th>Quarter / Date</th><th style="width:100px;text-align:right">Units (600/qtr)</th><th style="width:110px;text-align:right">Value @ $<span id="ctsh-display-2">54</span></th></tr></thead>
+          <tbody id="rsu-proj-body"></tbody>
+          <tfoot><tr class="tot-row"><td>Projected total</td><td id="rsu-proj-units-tot" style="text-align:right">—</td><td id="rsu-proj-val-tot" style="text-align:right">—</td></tr></tfoot>
+        </table>
+      </div>
+      <div class="note" style="margin-top:8px">Projected RSU continues at 600 units/quarter from Q2 2029 through employment end. Auto-generated based on employment end date dropdown.</div>
+    </div>
+  </div>
+
+  <!-- SECTION C: Income Projection Table -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-income-proj')">
+      <span class="card-title">Year-by-year income projection</span>
+      <span class="card-arrow open" id="arr-c-income-proj">▶</span>
+    </div>
+    <div class="card-body" id="c-income-proj">
+      <div style="overflow-x:auto">
+        <table class="exp-table" style="font-size:10px">
+          <thead><tr>
+            <th style="min-width:50px;text-align:center">Year</th>
+            <th style="min-width:100px;text-align:right">Salary (₹)</th>
+            <th style="min-width:90px;text-align:center">RSU Units</th>
+            <th style="min-width:110px;text-align:right">RSU Value (₹)</th>
+            <th style="min-width:110px;text-align:right">Gross (₹)</th>
+            <th style="min-width:100px;text-align:right">Tax @ 35% (₹)</th>
+            <th style="min-width:110px;text-align:right;color:var(--green);font-weight:600">Net (₹)</th>
+          </tr></thead>
+          <tbody id="income-proj-body"></tbody>
+        </table>
+      </div>
+      <div class="note" style="margin-top:8px">Tax rate: 35% applied to gross income (salary + RSU value). RSU taxed as income upon vesting. Salary shows zero after employment ends.</div>
+    </div>
+  </div>
+
 </div>
 </div>
 
@@ -705,7 +756,7 @@ const fG=v=>'£'+Math.round(v).toLocaleString();
 function getP(){
   // Parse employment end MMYY → {endMo, endYr} e.g. "1228" → Dec 2028
   const emplOn=g('chip-empl')&&g('chip-empl').classList.contains('on');
-  const raw=(g('empl-end')?g('empl-end').value:'1228').padStart(4,'0');
+  const raw=(g('empl-end')?g('empl-end').value:'1234').padStart(4,'0');
   const emplEndMo=Math.min(12,Math.max(1,parseInt(raw.slice(0,2))||12));
   const emplEndYr=parseInt('20'+raw.slice(2))||2028;
   return{
@@ -776,6 +827,78 @@ function rsuInYear(yr, p){
 function gratYear(p){
   const totalMo=p.emplEndYr*12+p.emplEndMo+p.gratdelay;
   return Math.floor(totalMo/12);
+}
+
+// Generate projected RSU: 600 units/quarter from Q2 2029 through employment end
+function generateProjectedRSU(emplEndYr, emplEndMo){
+  const projected=[];
+  const baseId=100;
+  let id=baseId;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const quarters=[
+    {mo:6,name:'Q2'},   // Jun
+    {mo:9,name:'Q3'},   // Sep
+    {mo:12,name:'Q4'}   // Dec
+  ];
+
+  let year=2029,month=6;
+  while(year<emplEndYr||(year===emplEndYr&&month<=emplEndMo)){
+    const quarter=quarters.find(q=>q.mo===month)||{mo:month,name:'Q'+Math.ceil(month/3)};
+    const dateStr=months[month-1]+' 30, '+year;
+    projected.push({
+      id:id++,
+      units:600,
+      date:dateStr,
+      isProjected:true
+    });
+    month+=3;
+    if(month>12){
+      month-=12;
+      year++;
+    }
+  }
+  return projected;
+}
+
+// Calculate year-by-year income projection
+function getIncomeProjection(p){
+  const projection=[];
+  const SAL_MONTHLY=SAL_ANNUAL/12;
+
+  // Helper: get total RSU units vesting in a year
+  const totalRSUInYear=(yr)=>{
+    let total=0;
+    rsuSchedule.forEach(r=>{
+      const ry=parseInt(r.date.slice(-4));
+      const raw=r.date.split(' ');
+      const MONTHS={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+      const rm=MONTHS[raw[0]]||1;
+      if(ry===yr){
+        if(ry<p.emplEndYr||(ry===p.emplEndYr&&rm<=p.emplEndMo)){
+          total+=r.units;
+        }
+      }
+    });
+    return total;
+  };
+
+  for(let yr=2026;yr<=p.endYr;yr++){
+    const salMo=emplMonthsInYear(yr,p);
+    const salary=salMo>0?(SAL_MONTHLY*salMo):0;
+
+    const rsuUnits=totalRSUInYear(yr);
+    const rsuValue=rsuUnits*p.ctsh*p.usdinr;
+
+    const gross=salary+rsuValue;
+    const tax=gross*0.35;
+    const net=gross-tax;
+
+    projection.push({
+      yr, salary, rsuUnits, rsuValue, gross, tax, net
+    });
+  }
+
+  return projection;
 }
 
 function totalAssets(p){
@@ -1014,6 +1137,80 @@ function addRSURow(){
   const p=getP();renderRSUTable(p);update();
 }
 
+// Render Income Tab: Salary section
+function renderSalarySection(p){
+  if(g('sal-status')){
+    g('sal-status').textContent=p.emplOn?'Employment ON':'Employment OFF';
+    g('sal-status').style.color=p.emplOn?'var(--green)':'var(--red)';
+  }
+  if(g('sal-end-disp')){
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    g('sal-end-disp').textContent=months[p.emplEndMo-1]+' '+p.emplEndYr;
+  }
+  if(g('sal-years-disp')){
+    const years=(p.emplEndYr-2026)+p.emplEndMo/12;
+    g('sal-years-disp').textContent=years.toFixed(1);
+  }
+}
+
+// Render Income Tab: RSU vesting schedules (current & projected)
+function renderRSUSchedules(p){
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Current RSU (editable)
+  const tb=g('rsu-body');if(tb){
+    tb.innerHTML='';
+    rsuSchedule.forEach(r=>{
+      const val=r.units*p.ctsh*p.usdinr;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><input class="amt" type="text" value="${r.date}" style="width:130px;text-align:left" onchange="updRSU(${r.id},'date',this.value)"></td><td style="text-align:right"><input class="amt" type="number" value="${r.units}" style="width:80px" onchange="updRSU(${r.id},'units',this.value)"></td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${fI(val)}</td><td><button class="del-btn" onclick="delRSU(${r.id})">&times;</button></td>`;
+      tb.appendChild(tr);
+    });
+  }
+  const curUnits=totalRSUUnits();
+  const curVal=curUnits*p.ctsh*p.usdinr;
+  if(g('rsu-units-tot'))g('rsu-units-tot').textContent=curUnits.toLocaleString();
+  if(g('rsu-val-tot'))g('rsu-val-tot').textContent=fI(curVal);
+  if(g('rsu-total'))g('rsu-total').textContent=curUnits.toLocaleString();
+
+  // Projected RSU (read-only, auto-generated)
+  const projected=generateProjectedRSU(p.emplEndYr,p.emplEndMo);
+  const pb=g('rsu-proj-body');if(pb){
+    pb.innerHTML='';
+    projected.forEach(r=>{
+      const val=r.units*p.ctsh*p.usdinr;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="font-family:'DM Mono',monospace;font-size:10px">${r.date}</td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${r.units.toLocaleString()}</td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${fI(val)}</td>`;
+      pb.appendChild(tr);
+    });
+  }
+  const projUnits=projected.reduce((s,r)=>s+r.units,0);
+  const projVal=projUnits*p.ctsh*p.usdinr;
+  if(g('rsu-proj-units-tot'))g('rsu-proj-units-tot').textContent=projUnits.toLocaleString();
+  if(g('rsu-proj-val-tot'))g('rsu-proj-val-tot').textContent=fI(projVal);
+  if(g('proj-end-disp'))g('proj-end-disp').textContent=months[p.emplEndMo-1]+' '+p.emplEndYr;
+  if(g('ctsh-display'))g('ctsh-display').textContent=p.ctsh;
+  if(g('ctsh-display-2'))g('ctsh-display-2').textContent=p.ctsh;
+}
+
+// Render Income Tab: Income projection table
+function renderIncomeProjection(p){
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const projection=getIncomeProjection(p);
+  const pb=g('income-proj-body');if(!pb)return;
+  pb.innerHTML='';
+  projection.forEach(row=>{
+    const tr=document.createElement('tr');
+    const salStr=fI(row.salary);
+    const rsuValStr=fI(row.rsuValue);
+    const grossStr=fI(row.gross);
+    const taxStr=fI(row.tax);
+    const netStr=fI(row.net);
+    tr.innerHTML=`<td style="text-align:center;font-weight:600">${row.yr}</td><td style="text-align:right;font-family:'DM Mono',monospace">${salStr}</td><td style="text-align:center;font-family:'DM Mono',monospace;color:var(--text3)">${row.rsuUnits.toLocaleString()}</td><td style="text-align:right;font-family:'DM Mono',monospace">${rsuValStr}</td><td style="text-align:right;font-family:'DM Mono',monospace">${grossStr}</td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--red)">${taxStr}</td><td style="text-align:right;font-family:'DM Mono',monospace;color:var(--green);font-weight:600">${netStr}</td>`;
+    pb.appendChild(tr);
+  });
+}
+
 function switchTab(id){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1130,8 +1327,6 @@ function update(){
     {name:'SGD cash',base:`S$${(p.sgdc/1000).toFixed(0)}K`,tax:'—',net:fI(p.sgdc*p.sgdinr),liqYr:'2026',dim:false},
     {name:'INR cash',base:`₹${(p.inrc/1e5).toFixed(0)}L`,tax:'—',net:fI(p.inrc),liqYr:'2026',dim:false},
     {name:'INR equity',base:`₹${(p.inreq/1e5).toFixed(0)}L`,tax:'—',net:fI(p.inreq),liqYr:'2026',dim:false},
-    {name:'RSU ('+totalRSUUnits()+' units)',base:`${totalRSUUnits().toLocaleString()} × $${p.ctsh}`,tax:'15%',net:fI(a.rsu),liqYr:p.emplOn?`${2026}–${p.emplEndYr}`:'OFF',dim:!p.emplOn},
-    {name:'Salary',base:`₹${(SAL_ANNUAL/12/1e3).toFixed(0)}K/mo`,tax:'—',net:p.emplOn?fI(SAL_ANNUAL*(p.emplEndYr-2026)+SAL_ANNUAL/12*p.emplEndMo):'OFF',liqYr:p.emplOn?`${2026}–${p.emplEndYr}`:'OFF',dim:!p.emplOn},
   ];
   const atEl=g('asset-grid');
   if(atEl){
@@ -1150,7 +1345,11 @@ function update(){
   // Re-render GBP grids (INR row depends on gbpinr)
   renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
   renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
-  renderRSUTable(p);
+
+  // Render Income tab (handles both current and projected RSU)
+  renderSalarySection(p);
+  renderRSUSchedules(p);
+  renderIncomeProjection(p);
 
   // MSR section
   const mT=totM(),qT=totQ();
@@ -1282,18 +1481,18 @@ function syncPair(sId,nId){
 }
 ['ctsh','ret','infl'].forEach(id=>syncPair(id,id+'-n'));
 
-// Populate employment end dropdown: Jun 2026 → Oct 2034
+// Populate employment end dropdown: Jun 2026 → Dec 2034
 (function(){
   const sel=g('empl-end');if(!sel)return;
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   for(let yr=2026;yr<=2034;yr++){
     const startMo=(yr===2026?5:0); // 0-based, Jun=5
-    const endMo=(yr===2034?9:11);  // Oct=9
+    const endMo=(yr===2034?11:11);  // Dec=11
     for(let m=startMo;m<=endMo;m++){
       const val=String(m+1).padStart(2,'0')+String(yr).slice(2);
       const opt=document.createElement('option');
       opt.value=val;opt.textContent=months[m]+' '+yr;
-      if(val==='1228')opt.selected=true;
+      if(val==='1234')opt.selected=true;
       sel.appendChild(opt);
     }
   }

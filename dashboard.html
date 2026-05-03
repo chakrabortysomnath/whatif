@@ -766,6 +766,7 @@ function delSWP(id){
 }
 
 const g=id=>document.getElementById(id);
+const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
 const fI=v=>{const a=Math.abs(v);let s=a>=1e7?'₹'+(a/1e7).toFixed(2)+'Cr':a>=1e5?'₹'+(a/1e5).toFixed(1)+'L':'₹'+Math.round(a).toLocaleString('en-IN');return v<0?'('+s+')':s};
 const fCr=v=>(v/1e7).toFixed(2)+'Cr';
 const fS=v=>{const a=Math.abs(v);const s='S$'+(a>=1000?(a/1000).toFixed(0)+'K':Math.round(a));return v<0?'('+s+')':s};
@@ -782,8 +783,7 @@ function updateSalaryDisplay(){
   if(g('salary-tax-rate-n'))g('salary-tax-rate-n').value=taxRate;
   if(g('salary-tax-rate'))g('salary-tax-rate').value=taxRate;
 
-  // Update display values
-  const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
+  // Update display values (using global st function)
   st('v-salary-gross',fI(gross));
   st('v-salary-tax-rate',taxRate.toFixed(0)+'%');
   st('v-salary-net',fI(net));
@@ -1513,8 +1513,7 @@ function update(){
   const p=getP();
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
 
-  // Top bar labels
-  const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
+  // Top bar labels (using global st function)
   st('v-ctsh','$'+p.ctsh);
   st('v-usdinr',p.usdinr.toFixed(1));
   st('v-gbpinr',p.gbpinr.toFixed(1));
@@ -1561,10 +1560,9 @@ function update(){
   }
   renderSWPTable(p);
 
-  // Display totals with consistent formatting
+  // Display totals with consistent formatting (using global st function)
   const monthlytotals=fI(totM());
   const quarterlytotals=fI(totQ());
-  const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
   st('monthly-tot',monthlytotals);
   st('quarterly-tot',quarterlytotals);
   if(g('monthly-meta'))g('monthly-meta').textContent=monthlytotals+' per month';

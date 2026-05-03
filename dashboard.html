@@ -246,7 +246,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="tb-sep"></div>
 
     <div class="tog-group">
-      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">RSU Active</label>
+      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">Job Exit On</label>
       <select id="empl-end" onchange="update()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:10px;padding:3px 6px;border-radius:4px;font-family:'DM Mono',monospace;margin-left:6px"></select>
     </div>
 
@@ -398,7 +398,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
         <div style="font-size:11px;color:var(--text2)"><strong>Period:</strong> June 2026 → <span id="sal-end-disp">Dec 2034</span> (<span id="sal-years-disp">8.5</span> years)</div>
       </div>
 
-      <div class="note">Edit salary amount and tax rate above. Changes apply instantly to all projections. Employment dates are controlled by the "RSU Active" dropdown in the top bar.</div>
+      <div class="note">Edit salary amount and tax rate above. Changes apply instantly to all projections. Employment dates are controlled by the "Job Exit On" dropdown in the top bar.</div>
     </div>
   </div>
 
@@ -423,12 +423,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <div class="group-lbl">Projected schedule (Q2 2029 → <span id="proj-end-disp">Dec 2034</span>)</div>
       <div style="overflow-x:auto">
         <table class="exp-table">
-          <thead><tr><th>Quarter / Date</th><th style="width:100px;text-align:right">Units (600/qtr)</th><th style="width:110px;text-align:right">Value @ $<span id="ctsh-display-2">54</span></th></tr></thead>
+          <thead><tr><th>Quarter / Date</th><th style="width:100px;text-align:right">Units/qtr (editable)</th><th style="width:110px;text-align:right">Value @ $<span id="ctsh-display-2">54</span></th><th style="width:24px"></th></tr></thead>
           <tbody id="rsu-proj-body"></tbody>
-          <tfoot><tr class="tot-row"><td>Projected total</td><td id="rsu-proj-units-tot" style="text-align:right">—</td><td id="rsu-proj-val-tot" style="text-align:right">—</td></tr></tfoot>
+          <tfoot><tr class="tot-row"><td>Projected total</td><td id="rsu-proj-units-tot" style="text-align:right">—</td><td id="rsu-proj-val-tot" style="text-align:right">—</td><td></td></tr></tfoot>
         </table>
       </div>
-      <div class="note" style="margin-top:8px">Projected RSU continues at 600 units/quarter from Q2 2029 through employment end. Auto-generated based on employment end date dropdown.</div>
+      <div class="note" style="margin-top:8px">Projected RSU continues at 300 units/quarter (default, editable) from Q2 2029 through employment end. Change units or delete quarters as needed.</div>
     </div>
   </div>
 
@@ -645,6 +645,8 @@ const DEFAULT_RSU=[
 ];
 let rsuSchedule=DEFAULT_RSU.map(r=>({...r}));
 let rsuNextId=100;
+let projRSU=[]; // Projected RSU tranches (Q2 2029 onwards)
+let projRSUNextId=200;
 
 function rsuByYear(){
   const m={};
@@ -673,13 +675,13 @@ let neilRows=[
 ];
 
 let monthlyExp=[
-  {id:50,name:'Baba & Ma',val:500000},{id:51,name:'3 Salaries',val:600000},
-  {id:52,name:'Medicine',val:150000},{id:53,name:'Travel & Conveyance',val:200000},
-  {id:54,name:'Maintenance',val:200000},{id:55,name:'Utilities',val:150000},
-  {id:56,name:'Food & Beverages',val:800000},{id:57,name:'Car Loan EMI',val:330000},
-  {id:58,name:'Personal expenses',val:300000},
+  {id:50,name:'Baba & Ma',val:50000},{id:51,name:'3 Salaries',val:60000},
+  {id:52,name:'Medicine',val:15000},{id:53,name:'Travel & Conveyance',val:20000},
+  {id:54,name:'Maintenance',val:15000},{id:55,name:'Utilities',val:15000},
+  {id:56,name:'Food & Beverages',val:80000},{id:57,name:'Car Loan EMI',val:33000},
+  {id:58,name:'Personal expenses',val:30000},
 ];
-let quarterlyExp=[{id:101,name:'Tukun',val:500000},{id:102,name:'Misc Travel',val:2000000}];
+let quarterlyExp=[{id:101,name:'Tukun',val:50000},{id:102,name:'Misc Travel',val:200000}];
 let nxtId=300;
 let swpRows=[];
 
@@ -772,10 +774,10 @@ function delSWP(id){
 
 const g=id=>document.getElementById(id);
 const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
-const fI=v=>{const a=Math.abs(v);let s=a>=1e7?'₹'+(a/1e7).toFixed(2)+'Cr':a>=1e5?'₹'+(a/1e5).toFixed(1)+'L':'₹'+Math.round(a).toLocaleString('en-IN');return v<0?'('+s+')':s};
+const fI=v=>{const a=Math.abs(v);let s;if(a>=1e7){s='₹'+(a/1e7).toFixed(2)+'Cr';}else if(a>=1e5){s='₹'+(a/1e5).toFixed(1)+'L';}else{s='₹'+Math.round(a).toLocaleString('en-IN');}return v<0?'('+s+')':s};
 const fCr=v=>(v/1e7).toFixed(2)+'Cr';
-const fS=v=>{const a=Math.abs(v);const s='S$'+(a>=1000?(a/1000).toFixed(0)+'K':Math.round(a));return v<0?'('+s+')':s};
-const fG=v=>'£'+Math.round(v).toLocaleString();
+const fS=v=>{const a=Math.abs(v);const s='S$'+(a>=1000?(a/1000).toFixed(0)+'K':Math.round(a).toLocaleString('en-IN'));return v<0?'('+s+')':s};
+const fG=v=>'£'+Math.round(v).toLocaleString('en-IN');
 
 // Sync salary controls and update display
 function updateSalaryDisplay(){
@@ -959,12 +961,12 @@ function emplMonthsInYear(yr, p){
   if(yr === p.emplEndYr) return p.emplEndMo; // full months up to and including end month
   return 0;
 }
-// RSU vesting: only count tranches that vest on/before end date
+// RSU vesting: count tranches from both current and projected schedules
 function rsuInYear(yr, p){
   if(!p.emplOn) return 0;
-  const rsuMap=rsuByYear();
   // Filter by end date: only include if year < endYr, or year == endYr and month <= endMo
   let total=0;
+  // Current RSU schedule
   rsuSchedule.forEach(r=>{
     const ry=parseInt(r.date.slice(-4));
     const raw=r.date.split(' ');
@@ -976,6 +978,13 @@ function rsuInYear(yr, p){
       }
     }
   });
+  // Projected RSU schedule
+  projRSU.forEach(r=>{
+    const ry=parseInt(r.date.slice(-4));
+    if(ry===yr&&ry<p.emplEndYr){
+      total+=r.units;
+    }
+  });
   return total;
 }
 // Gratuity year = salary end year + delay months (rounded to year)
@@ -984,25 +993,16 @@ function gratYear(p){
   return Math.floor(totalMo/12);
 }
 
-// Generate projected RSU: 600 units/quarter from Q2 2029 through employment end
-function generateProjectedRSU(emplEndYr, emplEndMo){
-  const projected=[];
-  const baseId=100;
-  let id=baseId;
+// Generate and manage projected RSU: 300 units/quarter from Q2 2029 through employment end
+function initializeProjectedRSU(emplEndYr, emplEndMo){
+  if(projRSU.length>0)return; // Already initialized
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const quarters=[
-    {mo:6,name:'Q2'},   // Jun
-    {mo:9,name:'Q3'},   // Sep
-    {mo:12,name:'Q4'}   // Dec
-  ];
-
   let year=2029,month=6;
   while(year<emplEndYr||(year===emplEndYr&&month<=emplEndMo)){
-    const quarter=quarters.find(q=>q.mo===month)||{mo:month,name:'Q'+Math.ceil(month/3)};
     const dateStr=months[month-1]+' 30, '+year;
-    projected.push({
-      id:id++,
-      units:600,
+    projRSU.push({
+      id:projRSUNextId++,
+      units:300,  // Default 300 units/quarter (editable)
       date:dateStr,
       isProjected:true
     });
@@ -1012,7 +1012,22 @@ function generateProjectedRSU(emplEndYr, emplEndMo){
       year++;
     }
   }
-  return projected;
+}
+
+function generateProjectedRSU(emplEndYr, emplEndMo){
+  initializeProjectedRSU(emplEndYr, emplEndMo);
+  return projRSU;
+}
+
+function updProjRSU(id, key, val){
+  const r=projRSU.find(x=>x.id===id);
+  if(r)r[key]=(key==='date')?val:+val;
+  const p=getP();renderRSUSchedules(p);update();
+}
+
+function delProjRSU(id){
+  projRSU=projRSU.filter(x=>x.id!==id);
+  const p=getP();renderRSUSchedules(p);update();
 }
 
 // Calculate year-by-year income projection
@@ -1125,7 +1140,7 @@ function buildYears(p){
     const open=inrBal;
     const ret=open>0?open*p.ret:0;
     const salMo=emplMonthsInYear(yr,p);
-    const sal=(p.salaryGross/12)*salMo;  // Use salary from context bar input control
+    const sal=(p.salaryGross/12)*salMo*(1-p.salaryTaxRate);  // Net salary after tax
     const rsuUnits=rsuInYear(yr,p);
     const rsu=rsuUnits*p.ctsh*0.85*p.usdinr;
     // One-time inflows — residual for SWP assets, full value otherwise (using dynamic liquidity years)
@@ -1347,14 +1362,14 @@ function renderRSUSchedules(p){
   if(g('rsu-val-tot'))g('rsu-val-tot').textContent=fI(curVal);
   if(g('rsu-total'))g('rsu-total').textContent=curUnits.toLocaleString();
 
-  // Projected RSU (read-only, auto-generated)
+  // Projected RSU (editable, auto-generated with 300/quarter default)
   const projected=generateProjectedRSU(p.emplEndYr,p.emplEndMo);
   const pb=g('rsu-proj-body');if(pb){
     pb.innerHTML='';
     projected.forEach(r=>{
       const val=r.units*p.ctsh*p.usdinr;
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td style="font-family:'DM Mono',monospace;font-size:10px">${r.date}</td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${r.units.toLocaleString()}</td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${fI(val)}</td>`;
+      tr.innerHTML=`<td style="font-family:'DM Mono',monospace;font-size:10px">${r.date}</td><td style="text-align:right"><input class="amt" type="number" value="${r.units}" style="width:80px" onchange="updProjRSU(${r.id},'units',this.value)"></td><td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${fI(val)}</td><td><button class="del-btn" onclick="delProjRSU(${r.id})">&times;</button></td>`;
       pb.appendChild(tr);
     });
   }
@@ -1527,6 +1542,14 @@ let cfChart=null;
 
 function update(){
   const p=getP();
+  // Regenerate projected RSU if employment end date has changed
+  const lastProjEnd=window._lastProjEnd;
+  const currentProjEnd=`${p.emplEndYr}-${p.emplEndMo}`;
+  if(lastProjEnd!==currentProjEnd){
+    projRSU=[]; // Reset projected RSU to trigger regeneration
+    window._lastProjEnd=currentProjEnd;
+  }
+
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
 
   // Top bar labels (using global st function)

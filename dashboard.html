@@ -309,7 +309,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     </div>
     <div class="card-body" id="c-tl">
       <div class="tl-wrap"><table class="tl-tbl" id="tl-tbl"></table></div>
-      <div class="note">Opening 2026 = SGD equity + SGD cash (at SGD/INR) + ₹17L. Closing balance carries forward. 7% return applies to INR-denominated balance only (excludes SGD assets). SGD assets yield no return.</div>
+      <div class="note">Opening 2026 = INR assets (cash ₹17L + equity ₹19L). SGD assets (equity, cash, MSR corpus) become liquid in 2026/2029 and start earning 7% return from that year onwards. MSR corpus specifically: liquid in Jun 2029, earns return from 2030.</div>
     </div>
   </div>
 </div>
@@ -796,7 +796,7 @@ function updateSalaryDisplay(){
   st('v-salary-gross',fI(gross));
   st('v-salary-tax-rate',taxRate.toFixed(0)+'%');
   st('v-salary-net',fI(net));
-  st('v-salary-monthly',fI(monthly)+'/month');
+  st('v-salary-monthly',fI(monthlyNet)+'/month');
 }
 
 // Asset configuration management
@@ -1093,7 +1093,8 @@ function totalAssets(p){
 
 function buildYears(p){
   YEARS=Array.from({length:p.endYr-2025},(_,i)=>2026+i);
-  let inrBal=p.inrc+p.inreq;
+  let inrBal=p.inrc+p.inreq;  // Only true INR assets earn return
+  let sgdBal=(p.msr+p.eq+p.sgdc); // SGD assets in SGD value - don't earn return until liquidated
   const gyr=gratYear(p);
 
   // ── Multi-SWP setup ────────────────────────────────────────────────
@@ -1104,14 +1105,20 @@ function buildYears(p){
   const absliData=getAssetData('absli');
   const gratData=getAssetData('grat');
   const msrData=getAssetData('msr');
+  const eqData=getAssetData('eq');
+  const sgdcData=getAssetData('sgdc');
+
+  // Get ABSLI tax rate from asset config
+  const absliTaxRate=absliData.taxRate;
+  const absliCOA=absliData.base*0.1; // Approximate COA as 10% of base (can be refined)
 
   const assetNet={
     fa:netTax(p.fa,p.facoa,p.fatax)*p.tFa,
     gw:netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw,
-    prop:p.propval,absli:p.absli,grat:p.grat,
+    prop:p.propval,absli:netTax(p.absli,absliCOA,absliTaxRate),grat:p.grat,
     msr:p.msr*p.sgdinr,
   };
-  const assetAvailYr={fa:faData.liqYear,gw:gwData.liqYear,prop:propData.liqYear,absli:absliData.liqYear,grat:gyr,msr:msrData.liqYear};
+  const assetAvailYr={fa:faData.liqYear,gw:gwData.liqYear,prop:propData.liqYear,absli:absliData.liqYear,grat:gyr,msr:msrData.liqYear,eq:eqData.liqYear,sgdc:sgdcData.liqYear};
   // Per-row mutable state
   const swpState=swpRows.map(r=>{
     const av=assetAvailYr[r.asset]||2026;
@@ -1149,7 +1156,11 @@ function buildYears(p){
     const prop =yr===assetAvailYr.prop ?(hasSWP('prop') ?residual('prop') :p.propval)    :0;
     const absliI=yr===assetAvailYr.absli?(hasSWP('absli')?residual('absli'):p.absli)     :0;
     const gratI=yr===assetAvailYr.grat      ?(hasSWP('grat') ?residual('grat') :p.grat)       :0;
-    const sgdLiq=yr===assetAvailYr.fa?(p.eq+p.sgdc)*p.sgdinr:0;
+    // SGD assets (eq, sgdc) become liquid and start earning return when liquidated
+    let sgdLiqAmount=0;
+    if(yr===assetAvailYr.eq)sgdLiqAmount+=p.eq*p.sgdinr;
+    if(yr===assetAvailYr.sgdc)sgdLiqAmount+=p.sgdc*p.sgdinr;
+    const sgdLiq=sgdLiqAmount;
     const msrI=yr===assetAvailYr.msr?(hasSWP('msr')?residual('msr'):p.msr*p.sgdinr):0;
     const msrMo=p.msrMo[yr]||0;
     const msrO=msrMo*5000*p.sgdinr;

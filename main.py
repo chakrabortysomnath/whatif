@@ -6,7 +6,7 @@ import json
 import os
 import time
 import requests as http
-from data import load_state, save_state, reset_state
+from data import load_state, save_state, reset_state, get_db_stats, get_history, get_backup, restore_backup
 
 app = FastAPI()
 
@@ -371,3 +371,44 @@ async def api_forex(request: Request):
     if not is_auth(request):
         return JSONResponse({"ok": False}, status_code=401)
     return JSONResponse(get_forex_rates())
+
+
+@app.get("/api/db/stats")
+async def api_db_stats(request: Request):
+    """Get database statistics and health info."""
+    if not is_auth(request):
+        return JSONResponse({"ok": False, "error": "Unauthorized"}, status_code=401)
+    stats = get_db_stats()
+    return JSONResponse({"ok": True, "stats": stats})
+
+
+@app.get("/api/db/history")
+async def api_db_history(request: Request):
+    """Get change history for audit trail."""
+    if not is_auth(request):
+        return JSONResponse({"ok": False, "error": "Unauthorized"}, status_code=401)
+    history = get_history(limit=50)
+    return JSONResponse({"ok": True, "history": history})
+
+
+@app.get("/api/db/backups")
+async def api_db_backups(request: Request):
+    """List available backups."""
+    if not is_auth(request):
+        return JSONResponse({"ok": False, "error": "Unauthorized"}, status_code=401)
+    # Get stats which includes backup count
+    stats = get_db_stats()
+    return JSONResponse({"ok": True, "backups_available": stats["backups"]})
+
+
+@app.post("/api/db/restore")
+async def api_db_restore(request: Request):
+    """Restore a backup by ID."""
+    if not is_auth(request):
+        return JSONResponse({"ok": False, "error": "Unauthorized"}, status_code=401)
+    data = await request.json()
+    backup_id = data.get("backup_id")
+    if not backup_id:
+        return JSONResponse({"ok": False, "error": "backup_id required"}, status_code=400)
+    success = restore_backup(backup_id)
+    return JSONResponse({"ok": success})

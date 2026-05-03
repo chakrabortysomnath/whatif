@@ -1561,12 +1561,14 @@ function update(){
   renderSWPTable(p);
 
   // Display totals with consistent formatting (using global st function)
-  const monthlytotals=fI(totM());
-  const quarterlytotals=fI(totQ());
+  const mTotal=totM();
+  const qTotal=totQ();
+  const monthlytotals=fI(mTotal);
+  const quarterlytotals=fI(qTotal);
   st('monthly-tot',monthlytotals);
   st('quarterly-tot',quarterlytotals);
-  if(g('monthly-meta'))g('monthly-meta').textContent=monthlytotals+' per month';
-  if(g('quarterly-meta'))g('quarterly-meta').textContent=quarterlytotals+' per quarter';
+  if(g('monthly-meta'))g('monthly-meta').textContent=monthlytotals+' per month (₹'+mTotal.toLocaleString('en-IN')+')';
+  if(g('quarterly-meta'))g('quarterly-meta').textContent=quarterlytotals+' per quarter (₹'+qTotal.toLocaleString('en-IN')+')';
 
   const a=totalAssets(p);
   const ydata=buildYears(p);

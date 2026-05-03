@@ -245,8 +245,36 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
     <div class="tb-sep"></div>
 
+    <div class="tb-group">
+      <span class="tb-lbl">Salary (₹/yr)</span>
+      <div class="tb-ctrl">
+        <input type="number" id="salary-gross" value="9600000" step="100000" min="0" style="width:80px" onchange="update()">
+      </div>
+      <span class="tb-val" id="v-salary-gross">₹96L</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">Tax Rate (%)</span>
+      <div class="tb-ctrl">
+        <input type="range" id="salary-tax-rate" min="0" max="50" step="1" value="30" onchange="update()">
+        <input type="number" id="salary-tax-rate-n" value="30" step="1" min="0" max="50" onchange="update()">
+      </div>
+      <span class="tb-val" id="v-salary-tax-rate">30%</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
+    <div class="tb-group">
+      <span class="tb-lbl">Net (₹/yr)</span>
+      <span class="tb-val" id="v-salary-net" style="color:var(--green);font-weight:600">₹67.2L</span>
+    </div>
+
+    <div class="tb-sep"></div>
+
     <div class="tog-group">
-      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">Salary &amp; RSU</label>
+      <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">RSU Active</label>
       <select id="empl-end" onchange="update()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:10px;padding:3px 6px;border-radius:4px;font-family:'DM Mono',monospace;margin-left:6px"></select>
     </div>
 
@@ -742,6 +770,24 @@ const fI=v=>{const a=Math.abs(v);let s=a>=1e7?'₹'+(a/1e7).toFixed(2)+'Cr':a>=1
 const fCr=v=>(v/1e7).toFixed(2)+'Cr';
 const fS=v=>{const a=Math.abs(v);const s='S$'+(a>=1000?(a/1000).toFixed(0)+'K':Math.round(a));return v<0?'('+s+')':s};
 const fG=v=>'£'+Math.round(v).toLocaleString();
+
+// Sync salary controls and update display
+function updateSalaryDisplay(){
+  const gross=+(g('salary-gross')?g('salary-gross').value:9600000);
+  const taxRate=+(g('salary-tax-rate')?g('salary-tax-rate').value:30);
+  const taxAmount=gross*(taxRate/100);
+  const net=gross-taxAmount;
+
+  // Update linked controls
+  if(g('salary-tax-rate-n'))g('salary-tax-rate-n').value=taxRate;
+  if(g('salary-tax-rate'))g('salary-tax-rate').value=taxRate;
+
+  // Update display values
+  const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
+  st('v-salary-gross',fI(gross));
+  st('v-salary-tax-rate',taxRate.toFixed(0)+'%');
+  st('v-salary-net',fI(net));
+}
 
 // Asset configuration management
 let assetView='INR'; // Current view: INR or SGD
@@ -1515,10 +1561,14 @@ function update(){
   }
   renderSWPTable(p);
 
-  st('monthly-tot','₹'+totM().toLocaleString('en-IN'));
-  st('quarterly-tot','₹'+totQ().toLocaleString('en-IN'));
-  if(g('monthly-meta'))g('monthly-meta').textContent='₹'+(totM()/1e3).toFixed(0)+'K/mo total';
-  if(g('quarterly-meta'))g('quarterly-meta').textContent='₹'+(totQ()/1e3).toFixed(0)+'K/qtr total';
+  // Display totals with consistent formatting
+  const monthlytotals=fI(totM());
+  const quarterlytotals=fI(totQ());
+  const st=(id,v)=>{const el=g(id);if(el)el.textContent=v;};
+  st('monthly-tot',monthlytotals);
+  st('quarterly-tot',quarterlytotals);
+  if(g('monthly-meta'))g('monthly-meta').textContent=monthlytotals+' per month';
+  if(g('quarterly-meta'))g('quarterly-meta').textContent=quarterlytotals+' per quarter';
 
   const a=totalAssets(p);
   const ydata=buildYears(p);
@@ -1713,10 +1763,10 @@ function toggleTheme(){
 
 function syncPair(sId,nId){
   const sl=g(sId),inp=g(nId);
-  sl.addEventListener('input',()=>{inp.value=sl.value;update()});
-  inp.addEventListener('input',()=>{sl.value=inp.value;update()});
+  sl.addEventListener('input',()=>{inp.value=sl.value;update();updateSalaryDisplay();});
+  inp.addEventListener('input',()=>{sl.value=inp.value;update();updateSalaryDisplay();});
 }
-['ctsh','ret','infl'].forEach(id=>syncPair(id,id+'-n'));
+['ctsh','ret','infl','salary-tax-rate'].forEach(id=>syncPair(id,id+'-n'));
 
 // Populate employment end dropdown: Jun 2026 → Dec 2034
 (function(){
@@ -1737,7 +1787,14 @@ function syncPair(sId,nId){
 
 initializeAssetData();
 renderAllTables();
+
+// Handle salary-gross input changes
+if(g('salary-gross')){
+  g('salary-gross').addEventListener('input',()=>{update();updateSalaryDisplay();});
+}
+
 update();
+updateSalaryDisplay();
 </script>
 </body>
 </html>

@@ -865,9 +865,13 @@ function getIncomeProjection(p){
   const projection=[];
   const SAL_MONTHLY=SAL_ANNUAL/12;
 
-  // Helper: get total RSU units vesting in a year
+  // Generate projected RSU for income calculations
+  const projectedRSU=generateProjectedRSU(p.emplEndYr,p.emplEndMo);
+
+  // Helper: get total RSU units vesting in a year (includes both current and projected)
   const totalRSUInYear=(yr)=>{
     let total=0;
+    // Current RSU
     rsuSchedule.forEach(r=>{
       const ry=parseInt(r.date.slice(-4));
       const raw=r.date.split(' ');
@@ -877,6 +881,13 @@ function getIncomeProjection(p){
         if(ry<p.emplEndYr||(ry===p.emplEndYr&&rm<=p.emplEndMo)){
           total+=r.units;
         }
+      }
+    });
+    // Projected RSU
+    projectedRSU.forEach(r=>{
+      const ry=parseInt(r.date.slice(-4));
+      if(ry===yr){
+        total+=r.units;
       }
     });
     return total;

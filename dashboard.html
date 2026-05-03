@@ -112,6 +112,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .exp-table .nc{font-size:12px;color:var(--text2)}
 .exp-table input.amt{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:3px 7px;border-radius:4px;text-align:right;width:110px}
 .exp-table input.amt:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
+.asset-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:3px 5px;border-radius:4px;text-align:right}
+.asset-input:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
+.asset-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:9px;padding:3px 4px;border-radius:4px;cursor:pointer}
+.asset-select:focus{outline:none;border-color:var(--accent)}
+.asset-radio{cursor:pointer;margin:0 4px}
+.liq-year-col{min-width:35px;text-align:center}
 .exp-table .tot-row td{background:var(--bg3);color:var(--amber);font-family:'DM Mono',monospace;font-weight:500;font-size:12px;border-top:1px solid var(--border)}
 .del-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:1px 4px;border-radius:3px;line-height:1}
 .del-btn:hover{color:var(--red)}
@@ -316,41 +322,25 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="sec-title"><span class="sec-num">01</span> Assets snapshot</div>
 
   <div class="card">
-    <div class="card-hdr" onclick="toggleCard('c-assets')">
-      <span class="card-title">Asset values &amp; tax settings</span>
-      <span class="card-arrow open" id="arr-c-assets">▶</span>
-    </div>
-    <div class="card-body" id="c-assets">
-      <div class="ctx-grid">
-        <div class="ctx-item"><span class="ctx-lbl">Fine Advice market value (₹ Cr)</span><div class="ctx-row"><input type="number" id="fa" value="4.2" step="0.1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-fa">₹4.2Cr</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">FA cost of acquisition (₹ Cr)</span><div class="ctx-row"><input type="number" id="facoa" value="1.5" step="0.1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-facoa">₹1.5Cr</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">FA tax rate (%)</span><div class="ctx-row"><input type="number" id="fatax" value="30" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-fatax">30%</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">Growealth market value (₹ L)</span><div class="ctx-row"><input type="number" id="gw" value="45" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gw">₹45L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">GW cost of acquisition (₹ L)</span><div class="ctx-row"><input type="number" id="gwcoa" value="35" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gwcoa">₹35L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">GW tax rate (%)</span><div class="ctx-row"><input type="number" id="gwtax" value="30" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gwtax">30%</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">MSR corpus (SGD)</span><div class="ctx-row"><input type="number" id="msr" value="480000" step="10000" style="width:90px" oninput="update()"><span class="ctx-val" id="v-msr">S$480K</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">SGD equity investments</span><div class="ctx-row"><input type="number" id="eq" value="131000" step="5000" style="width:90px" oninput="update()"><span class="ctx-val" id="v-eq">S$131K</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">SGD cash</span><div class="ctx-row"><input type="number" id="sgdc" value="70000" step="5000" style="width:90px" oninput="update()"><span class="ctx-val" id="v-sgdc">S$70K</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">INR opening cash (₹ L)</span><div class="ctx-row"><input type="number" id="inrc" value="17" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-inrc">₹17L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">INR equity (₹ L)</span><div class="ctx-row"><input type="number" id="inreq" value="14" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-inreq">₹14L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">Property sale value (₹ L)</span><div class="ctx-row"><input type="number" id="propval" value="80" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-propval">₹80L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">Property sale year</span><div class="ctx-row"><input type="number" id="propyr" value="2027" min="2026" max="2035" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-propyr">2027</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">ABSLI maturity value (₹ L)</span><div class="ctx-row"><input type="number" id="absli" value="21" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-absli">₹21L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">ABSLI maturity year</span><div class="ctx-row"><input type="number" id="absliyr" value="2031" min="2026" max="2035" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-absliyr">2031</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">Gratuity + PF (₹ L)</span><div class="ctx-row"><input type="number" id="grat" value="50" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-grat">₹50L</span></div></div>
-        <div class="ctx-item"><span class="ctx-lbl">Gratuity delay (months)</span><div class="ctx-row"><input type="number" id="gratdelay" value="6" min="0" max="24" step="1" style="width:90px" oninput="update()"><span class="ctx-val" id="v-gratdelay">6mo</span></div></div>
-      </div>
-      <div class="note" style="margin-top:8px">Tax = (market value − cost of acquisition) × rate. Zero gain = no tax.</div>
-    </div>
-  </div>
-
-  <div class="card">
     <div class="card-hdr" onclick="toggleCard('c-assetsum')">
-      <span class="card-title">Asset summary</span>
+      <span class="card-title">Asset configuration &amp; liquidity</span>
       <span class="card-arrow open" id="arr-c-assetsum">▶</span>
     </div>
     <div class="card-body" id="c-assetsum">
-      <div class="asset-grid" id="asset-grid"></div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:10px;color:var(--text3)">View in: </label>
+        <button onclick="toggleAssetView('INR')" style="padding:4px 8px;margin-right:8px;border:1px solid var(--border);background:var(--bg3);border-radius:4px;cursor:pointer;font-size:10px" id="btn-view-inr">INR</button>
+        <button onclick="toggleAssetView('SGD')" style="padding:4px 8px;border:1px solid var(--border);background:var(--bg3);border-radius:4px;cursor:pointer;font-size:10px" id="btn-view-sgd">SGD</button>
+      </div>
+      <div style="overflow-x:auto;margin-bottom:20px">
+        <div id="asset-grid"></div>
+      </div>
+      <div style="border-top:2px solid var(--border);padding-top:16px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:12px">Asset Liquidity Breakdown (Year-by-Year)</div>
+        <div style="overflow-x:auto">
+          <div id="asset-summary-grid"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -752,6 +742,86 @@ const fI=v=>{const a=Math.abs(v);let s=a>=1e7?'₹'+(a/1e7).toFixed(2)+'Cr':a>=1
 const fCr=v=>(v/1e7).toFixed(2)+'Cr';
 const fS=v=>{const a=Math.abs(v);const s='S$'+(a>=1000?(a/1000).toFixed(0)+'K':Math.round(a));return v<0?'('+s+')':s};
 const fG=v=>'£'+Math.round(v).toLocaleString();
+
+// Asset configuration management
+let assetView='INR'; // Current view: INR or SGD
+const assetList=['fa','gw','prop','absli','grat','msr','eq','sgdc','inrc','inreq'];
+const assetMeta={
+  fa:{name:'Fine Advice',defaultCur:'INR',isSGD:false},
+  gw:{name:'Growealth',defaultCur:'INR',isSGD:false},
+  prop:{name:'Property LK-866',defaultCur:'INR',isSGD:false},
+  absli:{name:'ABSLI',defaultCur:'INR',isSGD:false},
+  grat:{name:'Gratuity + PF',defaultCur:'INR',isSGD:false},
+  msr:{name:'MSR corpus',defaultCur:'SGD',isSGD:true},
+  eq:{name:'SGD equity',defaultCur:'SGD',isSGD:true},
+  sgdc:{name:'SGD cash',defaultCur:'SGD',isSGD:true},
+  inrc:{name:'INR cash',defaultCur:'INR',isSGD:false},
+  inreq:{name:'INR equity',defaultCur:'INR',isSGD:false},
+};
+
+function getAssetData(id){
+  const base=parseFloat(localStorage.getItem(`asset_${id}_base`)||window[`asset_${id}_base`]||'0');
+  const currency=localStorage.getItem(`asset_${id}_currency`)||assetMeta[id].defaultCur;
+  const coa=parseFloat(localStorage.getItem(`asset_${id}_coa`)||window[`asset_${id}_coa`]||'0');
+  const taxRate=parseFloat(localStorage.getItem(`asset_${id}_tax`)||window[`asset_${id}_tax`]||'0')/100;
+  const liqYear=parseInt(localStorage.getItem(`asset_${id}_liqYear`)||window[`asset_${id}_liqYear`]||'2026');
+  return{base,currency,coa,taxRate,liqYear};
+}
+
+function setAssetData(id,field,value){
+  localStorage.setItem(`asset_${id}_${field}`,value);
+  window[`asset_${id}_${field}`]=value;
+  saveAssetConfig();
+  update();
+}
+
+function saveAssetConfig(){
+  const config={};
+  assetList.forEach(id=>{
+    const data=getAssetData(id);
+    config[`asset_${id}_base`]=data.base;
+    config[`asset_${id}_currency`]=data.currency;
+    config[`asset_${id}_coa`]=data.coa;
+    config[`asset_${id}_tax`]=Math.round(data.taxRate*100);
+    config[`asset_${id}_liqYear`]=data.liqYear;
+  });
+  fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(config)}).catch(e=>console.error('Save error:',e));
+}
+
+function toggleAssetView(view){
+  assetView=view;
+  g('btn-view-inr').style.background=assetView==='INR'?'var(--accent-bg)':'var(--bg3)';
+  g('btn-view-sgd').style.background=assetView==='SGD'?'var(--accent-bg)':'var(--bg3)';
+  renderAssetTable();
+}
+
+function initializeAssetData(){
+  // Initialize asset data with defaults if not already set
+  const defaults={
+    fa:{base:4.2,currency:'INR',coa:1.5,tax:30,liqYear:2026},
+    gw:{base:45,currency:'INR',coa:35,tax:30,liqYear:2026},
+    prop:{base:100,currency:'INR',coa:32,tax:15,liqYear:2027},
+    absli:{base:21.75,currency:'INR',coa:15,tax:13,liqYear:2031},
+    grat:{base:55,currency:'INR',coa:5.5,tax:10,liqYear:2032},
+    msr:{base:480,currency:'SGD',coa:0,tax:0,liqYear:2029},
+    eq:{base:131,currency:'SGD',coa:0,tax:0,liqYear:2026},
+    sgdc:{base:70,currency:'SGD',coa:0,tax:0,liqYear:2026},
+    inrc:{base:17,currency:'INR',coa:0,tax:0,liqYear:2026},
+    inreq:{base:19,currency:'INR',coa:10,tax:15,liqYear:2026},
+  };
+
+  assetList.forEach(id=>{
+    const stored=localStorage.getItem(`asset_${id}_base`);
+    if(!stored&&defaults[id]){
+      const d=defaults[id];
+      localStorage.setItem(`asset_${id}_base`,d.base);
+      localStorage.setItem(`asset_${id}_currency`,d.currency);
+      localStorage.setItem(`asset_${id}_coa`,d.coa);
+      localStorage.setItem(`asset_${id}_tax`,d.tax);
+      localStorage.setItem(`asset_${id}_liqYear`,d.liqYear);
+    }
+  });
+}
 
 function getP(){
   // Parse employment end MMYY → {endMo, endYr} e.g. "1228" → Dec 2028
@@ -1222,6 +1292,103 @@ function renderIncomeProjection(p){
   });
 }
 
+function renderAssetTable(){
+  const p=getP();
+  const yearRange=Array.from({length:p.endYr-2025},(_,i)=>2026+i);
+  const headerYears=yearRange.map(y=>`<th class="liq-year-col">${y}</th>`).join('');
+
+  const rows=assetList.map(id=>{
+    const data=getAssetData(id);
+    const meta=assetMeta[id];
+    const inr=data.currency==='SGD'?data.base*p.sgdinr:data.base;
+    const tax=Math.max(0,inr-data.coa)*data.taxRate;
+    const net=inr-tax;
+
+    const yMarks=yearRange.map(y=>`<td class="liq-year-col"><input type="radio" class="asset-radio" name="liq_${id}" value="${y}" ${y===data.liqYear?'checked':''} onchange="setAssetData('${id}','liqYear',${y})"></td>`).join('');
+
+    return `<tr>
+      <td style="min-width:120px;font-weight:500">${meta.name}</td>
+      <td><input class="asset-input" type="number" value="${data.base}" onchange="setAssetData('${id}','base',this.value)" style="width:70px"></td>
+      <td><select class="asset-select" onchange="setAssetData('${id}','currency',this.value)" style="width:60px"><option ${data.currency==='INR'?'selected':''}>INR</option><option ${data.currency==='SGD'?'selected':''}>SGD</option></select></td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px">${fI(inr)}</td>
+      <td><input class="asset-input" type="number" value="${data.coa}" onchange="setAssetData('${id}','coa',this.value)" style="width:70px"></td>
+      <td><input class="asset-input" type="number" value="${Math.round(data.taxRate*100)}" onchange="setAssetData('${id}','tax',this.value)" style="width:50px" min="0" max="100"></td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--red)">${fI(tax)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;color:var(--accent)">${fI(net)}</td>
+      ${yMarks}
+    </tr>`;
+  }).join('');
+
+  const table=`<table class="exp-table" style="font-size:10px">
+    <thead><tr>
+      <th style="min-width:120px">Asset</th>
+      <th style="min-width:80px">Base Value</th>
+      <th style="min-width:70px">Currency</th>
+      <th style="min-width:80px">Value in INR</th>
+      <th style="min-width:80px">Cost of Acq.</th>
+      <th style="min-width:60px">Tax %</th>
+      <th style="min-width:80px;color:var(--red)">Tax</th>
+      <th style="min-width:90px;color:var(--accent)">Net After Tax</th>
+      <th colspan="${yearRange.length}" style="text-align:center;padding:5px"><strong>Liquidity in</strong></th>
+    </tr><tr style="border-bottom:2px solid var(--border)">
+      <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+      ${headerYears}
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  const gridEl=g('asset-grid');
+  if(gridEl)gridEl.innerHTML=table;
+}
+
+function renderAssetSummary(){
+  const p=getP();
+  const yearRange=Array.from({length:p.endYr-2025},(_,i)=>2026+i);
+
+  let openBal=0;
+  assetList.forEach(id=>{
+    const data=getAssetData(id);
+    const inr=data.currency==='SGD'?data.base*p.sgdinr:data.base;
+    const tax=Math.max(0,inr-data.coa)*data.taxRate;
+    const net=inr-tax;
+    if(data.liqYear===2026)openBal+=net;
+  });
+
+  const rows=yearRange.map(yr=>{
+    let opening=openBal;
+    let inflow=0;
+    assetList.forEach(id=>{
+      const data=getAssetData(id);
+      if(data.liqYear===yr){
+        const inr=data.currency==='SGD'?data.base*p.sgdinr:data.base;
+        const tax=Math.max(0,inr-data.coa)*data.taxRate;
+        const net=inr-tax;
+        inflow+=net;
+      }
+    });
+    const closing=opening+inflow;
+    return `<tr>
+      <td style="font-weight:600;text-align:center">${yr}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${fI(opening)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">${fI(inflow)}</td>
+      <td style="text-align:right;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent)">${fI(closing)}</td>
+    </tr>`;
+  }).join('');
+
+  const table=`<table class="exp-table" style="font-size:10px">
+    <thead><tr>
+      <th style="text-align:center">Year</th>
+      <th style="text-align:right">Opening Balance</th>
+      <th style="text-align:right;color:var(--green)">Asset Inflow</th>
+      <th style="text-align:right;color:var(--accent)">Closing Balance</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  const summaryEl=g('asset-summary-grid');
+  if(summaryEl)summaryEl.innerHTML=table;
+}
+
 function switchTab(id){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1381,6 +1548,10 @@ function update(){
   renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
   renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
 
+  // Render Assets tab (editable table + liquidity breakdown)
+  renderAssetTable();
+  renderAssetSummary();
+
   // Render Income tab (handles both current and projected RSU)
   renderSalarySection(p);
   renderRSUSchedules(p);
@@ -1533,6 +1704,7 @@ function syncPair(sId,nId){
   }
 })();
 
+initializeAssetData();
 renderAllTables();
 update();
 </script>

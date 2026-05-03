@@ -593,7 +593,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <script>
 let YEARS=[2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
-const SAL_ANNUAL=4080000;
+const SAL_ANNUAL=9600000; // ₹96 lakhs per year = ₹8 lakhs per month
 
 // Default RSU vesting schedule — 2625 units total
 const DEFAULT_RSU=[
@@ -640,19 +640,19 @@ let neilRows=[
 ];
 
 let monthlyExp=[
-  {id:50,name:'Baba & Ma',val:50000},{id:51,name:'3 Salaries',val:60000},
-  {id:52,name:'Medicine',val:15000},{id:53,name:'Travel & Conveyance',val:20000},
-  {id:54,name:'Maintenance',val:20000},{id:55,name:'Utilities',val:15000},
-  {id:56,name:'Food & Beverages',val:80000},{id:57,name:'Car Loan EMI',val:33000},
-  {id:58,name:'Personal expenses',val:30000},
+  {id:50,name:'Baba & Ma',val:500000},{id:51,name:'3 Salaries',val:600000},
+  {id:52,name:'Medicine',val:150000},{id:53,name:'Travel & Conveyance',val:200000},
+  {id:54,name:'Maintenance',val:200000},{id:55,name:'Utilities',val:150000},
+  {id:56,name:'Food & Beverages',val:800000},{id:57,name:'Car Loan EMI',val:330000},
+  {id:58,name:'Personal expenses',val:300000},
 ];
-let quarterlyExp=[{id:101,name:'Tukun',val:50000},{id:102,name:'Misc Travel',val:200000}];
+let quarterlyExp=[{id:101,name:'Tukun',val:500000},{id:102,name:'Misc Travel',val:2000000}];
 let nxtId=300;
 let swpRows=[];
 
 let oneOffRows=[
-  {id:200,name:'Marriage - Rai',amount:1e7,year:2030},
-  {id:201,name:'Marriage - Neil',amount:1e7,year:2032},
+  {id:200,name:'Marriage - Rai',amount:100000000,year:2030},
+  {id:201,name:'Marriage - Neil',amount:100000000,year:2032},
 ];
 
 function renderOneOffTable(){
@@ -670,7 +670,7 @@ function renderOneOffTable(){
   if(g('oneoff-meta'))g('oneoff-meta').textContent=oneOffRows.length+' items · ₹'+(tot/1e7).toFixed(1)+'Cr total';
 }
 function addOneOff(){
-  oneOffRows.push({id:nxtId++,name:'New expense',amount:1e7,year:2030});
+  oneOffRows.push({id:nxtId++,name:'New expense',amount:10000000,year:2030});
   renderOneOffTable();update();
 }
 function updOneOff(id,key,val){
@@ -724,7 +724,7 @@ function renderSWPTable(p){
   });
 }
 function addSWPRow(){
-  swpRows.push({id:nxtId++,asset:'fa',amount:1e7,monthly:50000,startYr:2026,rate:8});
+  swpRows.push({id:nxtId++,asset:'fa',amount:10000000,monthly:50000,startYr:2026,rate:8});
   renderSWPTable();update();
 }
 function updSWP(id,key,val){
@@ -842,13 +842,17 @@ function getP(){
   const incrcData=getAssetData('inrc');
   const inreqData=getAssetData('inreq');
 
+  // Get SGD/INR rate for currency conversion
+  const sgdinrRate=parseFloat(g('sgdinr-n')?g('sgdinr-n').value:63);
+
   return{
     ctsh:+g('ctsh').value,
-    fa:faData.base*(faData.currency==='SGD'?parseFloat(g('sgdinr-n').value||63):1e7),
-    facoa:faData.coa*1e7,
+    // All values stored as full numbers; convert SGD to INR if needed
+    fa:faData.currency==='SGD'?faData.base*sgdinrRate:faData.base,
+    facoa:faData.coa,
     fatax:faData.taxRate,
-    gw:gwData.base*(gwData.currency==='SGD'?parseFloat(g('sgdinr-n').value||63):1e5),
-    gwcoa:gwData.coa*1e5,
+    gw:gwData.currency==='SGD'?gwData.base*sgdinrRate:gwData.base,
+    gwcoa:gwData.coa,
     gwtax:gwData.taxRate,
     msrMo:{
       2026:+(g('msr-mo-2026')?g('msr-mo-2026').value:7),
@@ -856,23 +860,25 @@ function getP(){
       2028:+(g('msr-mo-2028')?g('msr-mo-2028').value:12),
       2029:+(g('msr-mo-2029')?g('msr-mo-2029').value:5),
     },
-    msr:msrData.base*1000,
-    eq:eqData.base*1000,
-    sgdc:sgdcData.base*1000,
-    inrc:incrcData.base*1e5,
-    inreq:inreqData.base*1e5,
-    propval:propData.base*1e5,
+    // SGD assets: store as SGD values (will be multiplied by sgdinr in buildYears if needed)
+    msr:msrData.base,
+    eq:eqData.base,
+    sgdc:sgdcData.base,
+    // INR assets: already stored as full numbers
+    inrc:incrcData.base,
+    inreq:inreqData.base,
+    propval:propData.base,
     propyr:propData.liqYear,
-    absli:absliData.base*1e5,
+    absli:absliData.base,
     absliyr:absliData.liqYear,
-    grat:gratData.base*1e5,
+    grat:gratData.base,
     gratdelay:+(g('gratdelay')?g('gratdelay').value:6),
     ret:+(g('ret')?g('ret').value:0.07)/100,
     infl:+(g('infl')?g('infl').value:3)/100||0.03,
     endYr:+(g('end-yr')?g('end-yr').value:2035)||2035,
     usdinr:+(g('usdinr-n')?g('usdinr-n').value:84)||84,
     gbpinr:+(g('gbpinr-n')?g('gbpinr-n').value:107)||107,
-    sgdinr:+(g('sgdinr-n')?g('sgdinr-n').value:63)||63,
+    sgdinr:sgdinrRate,
     emplOn, emplEndMo, emplEndYr,
     tFa:1, tGw:1,
   };

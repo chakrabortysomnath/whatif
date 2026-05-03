@@ -796,18 +796,18 @@ function toggleAssetView(view){
 }
 
 function initializeAssetData(){
-  // Initialize asset data with defaults if not already set
+  // Initialize asset data with defaults if not already set (stored as full INR values)
   const defaults={
-    fa:{base:4.2,currency:'INR',coa:1.5,tax:30,liqYear:2026},
-    gw:{base:45,currency:'INR',coa:35,tax:30,liqYear:2026},
-    prop:{base:100,currency:'INR',coa:32,tax:15,liqYear:2027},
-    absli:{base:21.75,currency:'INR',coa:15,tax:13,liqYear:2031},
-    grat:{base:55,currency:'INR',coa:5.5,tax:10,liqYear:2032},
-    msr:{base:480,currency:'SGD',coa:0,tax:0,liqYear:2029},
-    eq:{base:131,currency:'SGD',coa:0,tax:0,liqYear:2026},
-    sgdc:{base:70,currency:'SGD',coa:0,tax:0,liqYear:2026},
-    inrc:{base:17,currency:'INR',coa:0,tax:0,liqYear:2026},
-    inreq:{base:19,currency:'INR',coa:10,tax:15,liqYear:2026},
+    fa:{base:420000000,currency:'INR',coa:150000000,tax:30,liqYear:2026},
+    gw:{base:4500000,currency:'INR',coa:3500000,tax:30,liqYear:2026},
+    prop:{base:10000000,currency:'INR',coa:3200000,tax:15,liqYear:2027},
+    absli:{base:2175000,currency:'INR',coa:1500000,tax:13,liqYear:2031},
+    grat:{base:5500000,currency:'INR',coa:550000,tax:10,liqYear:2032},
+    msr:{base:480000,currency:'SGD',coa:0,tax:0,liqYear:2029},
+    eq:{base:131000,currency:'SGD',coa:0,tax:0,liqYear:2026},
+    sgdc:{base:70000,currency:'SGD',coa:0,tax:0,liqYear:2026},
+    inrc:{base:1700000,currency:'INR',coa:0,tax:0,liqYear:2026},
+    inreq:{base:1900000,currency:'INR',coa:1000000,tax:15,liqYear:2026},
   };
 
   assetList.forEach(id=>{
@@ -1014,13 +1014,21 @@ function buildYears(p){
   const gyr=gratYear(p);
 
   // ── Multi-SWP setup ────────────────────────────────────────────────
+  // Read asset data from new configuration
+  const faData=getAssetData('fa');
+  const gwData=getAssetData('gw');
+  const propData=getAssetData('prop');
+  const absliData=getAssetData('absli');
+  const gratData=getAssetData('grat');
+  const msrData=getAssetData('msr');
+
   const assetNet={
     fa:netTax(p.fa,p.facoa,p.fatax)*p.tFa,
     gw:netTax(p.gw,p.gwcoa,p.gwtax)*p.tGw,
     prop:p.propval,absli:p.absli,grat:p.grat,
     msr:p.msr*p.sgdinr,
   };
-  const assetAvailYr={fa:2026,gw:2026,prop:p.propyr,absli:p.absliyr,grat:gyr,msr:2029};
+  const assetAvailYr={fa:faData.liqYear,gw:gwData.liqYear,prop:propData.liqYear,absli:absliData.liqYear,grat:gyr,msr:msrData.liqYear};
   // Per-row mutable state
   const swpState=swpRows.map(r=>{
     const av=assetAvailYr[r.asset]||2026;
@@ -1052,14 +1060,14 @@ function buildYears(p){
     const sal=(SAL_ANNUAL/12)*salMo;
     const rsuUnits=rsuInYear(yr,p);
     const rsu=rsuUnits*p.ctsh*0.85*p.usdinr;
-    // One-time inflows — residual for SWP assets, full value otherwise
-    const faI  =yr===2026     ?(hasSWP('fa')   ?residual('fa')   :assetNet.fa)  :0;
-    const gwI  =yr===2026     ?(hasSWP('gw')   ?residual('gw')   :assetNet.gw)  :0;
-    const prop =yr===p.propyr ?(hasSWP('prop') ?residual('prop') :p.propval)    :0;
-    const absliI=yr===p.absliyr?(hasSWP('absli')?residual('absli'):p.absli)     :0;
-    const gratI=yr===gyr      ?(hasSWP('grat') ?residual('grat') :p.grat)       :0;
-    const sgdLiq=yr===2026?(p.eq+p.sgdc)*p.sgdinr:0;
-    const msrI=yr===2029?(hasSWP('msr')?residual('msr'):p.msr*p.sgdinr):0;
+    // One-time inflows — residual for SWP assets, full value otherwise (using dynamic liquidity years)
+    const faI  =yr===assetAvailYr.fa     ?(hasSWP('fa')   ?residual('fa')   :assetNet.fa)  :0;
+    const gwI  =yr===assetAvailYr.gw     ?(hasSWP('gw')   ?residual('gw')   :assetNet.gw)  :0;
+    const prop =yr===assetAvailYr.prop ?(hasSWP('prop') ?residual('prop') :p.propval)    :0;
+    const absliI=yr===assetAvailYr.absli?(hasSWP('absli')?residual('absli'):p.absli)     :0;
+    const gratI=yr===assetAvailYr.grat      ?(hasSWP('grat') ?residual('grat') :p.grat)       :0;
+    const sgdLiq=yr===assetAvailYr.fa?(p.eq+p.sgdc)*p.sgdinr:0;
+    const msrI=yr===assetAvailYr.msr?(hasSWP('msr')?residual('msr'):p.msr*p.sgdinr):0;
     const msrMo=p.msrMo[yr]||0;
     const msrO=msrMo*5000*p.sgdinr;
     const inflFactor=Math.pow(1+p.infl,yr-2026);

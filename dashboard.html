@@ -245,34 +245,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
     <div class="tb-sep"></div>
 
-    <div class="tb-group">
-      <span class="tb-lbl">Salary (₹/yr)</span>
-      <div class="tb-ctrl">
-        <input type="number" id="salary-gross" value="9600000" step="100000" min="0" style="width:80px" onchange="update()">
-      </div>
-      <span class="tb-val" id="v-salary-gross">₹96L</span>
-    </div>
-
-    <div class="tb-sep"></div>
-
-    <div class="tb-group">
-      <span class="tb-lbl">Tax Rate (%)</span>
-      <div class="tb-ctrl">
-        <input type="range" id="salary-tax-rate" min="0" max="50" step="1" value="30" onchange="update()">
-        <input type="number" id="salary-tax-rate-n" value="30" step="1" min="0" max="50" onchange="update()">
-      </div>
-      <span class="tb-val" id="v-salary-tax-rate">30%</span>
-    </div>
-
-    <div class="tb-sep"></div>
-
-    <div class="tb-group">
-      <span class="tb-lbl">Net (₹/yr)</span>
-      <span class="tb-val" id="v-salary-net" style="color:var(--green);font-weight:600">₹67.2L</span>
-    </div>
-
-    <div class="tb-sep"></div>
-
     <div class="tog-group">
       <label class="tog-chip on" id="chip-empl" onclick="toggleEmpl()">RSU Active</label>
       <select id="empl-end" onchange="update()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:10px;padding:3px 6px;border-radius:4px;font-family:'DM Mono',monospace;margin-left:6px"></select>
@@ -388,12 +360,45 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <span class="card-arrow open" id="arr-c-salary">▶</span>
     </div>
     <div class="card-body" id="c-salary">
+      <!-- Salary Configuration Form -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <!-- Annual Salary -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">ANNUAL SALARY (₹/yr)</div>
+          <input type="number" id="salary-gross" value="9600000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;box-sizing:border-box" onchange="update();updateSalaryDisplay()">
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-salary-gross">₹96L</div>
+        </div>
+
+        <!-- Tax Rate -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">TAX RATE (%)</div>
+          <div style="display:flex;gap:4px">
+            <input type="range" id="salary-tax-rate" min="0" max="50" step="1" value="30" style="flex:1" onchange="update();updateSalaryDisplay()">
+            <input type="number" id="salary-tax-rate-n" value="30" step="1" min="0" max="50" style="width:50px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;text-align:right" onchange="update();updateSalaryDisplay()">
+          </div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-salary-tax-rate">30%</div>
+        </div>
+
+        <!-- Net Salary -->
+        <div style="background:var(--green-bg);padding:10px;border-radius:6px;border:1px solid var(--green-bdr)">
+          <div style="font-size:10px;color:var(--green);margin-bottom:4px;font-weight:600">NET SALARY (₹/yr)</div>
+          <div style="font-size:14px;color:var(--green);font-weight:600;font-family:'DM Mono',monospace" id="v-salary-net">₹67.2L</div>
+        </div>
+
+        <!-- Monthly Breakdown -->
+        <div style="background:var(--accent-bg);padding:10px;border-radius:6px;border:1px solid var(--accent-light)">
+          <div style="font-size:10px;color:var(--accent);margin-bottom:4px;font-weight:600">MONTHLY SALARY</div>
+          <div style="font-size:12px;color:var(--accent);font-weight:600;font-family:'DM Mono',monospace" id="v-salary-monthly">₹8L/month</div>
+        </div>
+      </div>
+
+      <!-- Employment Period Info -->
       <div style="padding:8px;background:var(--bg3);border-radius:6px;margin-bottom:12px">
         <div style="font-size:11px;color:var(--text2);margin-bottom:4px"><strong>Status:</strong> <span id="sal-status" style="color:var(--green)">Employment ON</span></div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px"><strong>Annual salary:</strong> ₹96L (₹8L/month)</div>
-        <div style="font-size:11px;color:var(--text2)"><strong>Employment period:</strong> June 2026 → <span id="sal-end-disp">Dec 2034</span> (<span id="sal-years-disp">8.5</span> years)</div>
+        <div style="font-size:11px;color:var(--text2)"><strong>Period:</strong> June 2026 → <span id="sal-end-disp">Dec 2034</span> (<span id="sal-years-disp">8.5</span> years)</div>
       </div>
-      <div class="note">Salary configuration is controlled by the "Employment end" dropdown in the top bar. Switch to desired end date, and this display will update automatically.</div>
+
+      <div class="note">Edit salary amount and tax rate above. Changes apply instantly to all projections. Employment dates are controlled by the "RSU Active" dropdown in the top bar.</div>
     </div>
   </div>
 
@@ -778,8 +783,10 @@ function updateSalaryDisplay(){
   const taxRate=+(g('salary-tax-rate')?g('salary-tax-rate').value:30);
   const taxAmount=gross*(taxRate/100);
   const net=gross-taxAmount;
+  const monthly=gross/12;
+  const monthlyNet=monthly*(100-taxRate)/100;
 
-  // Update linked controls
+  // Update linked controls (sync range and number inputs)
   if(g('salary-tax-rate-n'))g('salary-tax-rate-n').value=taxRate;
   if(g('salary-tax-rate'))g('salary-tax-rate').value=taxRate;
 
@@ -787,6 +794,7 @@ function updateSalaryDisplay(){
   st('v-salary-gross',fI(gross));
   st('v-salary-tax-rate',taxRate.toFixed(0)+'%');
   st('v-salary-net',fI(net));
+  st('v-salary-monthly',fI(monthly)+'/month');
 }
 
 // Asset configuration management

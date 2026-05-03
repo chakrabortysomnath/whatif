@@ -829,29 +829,46 @@ function getP(){
   const raw=(g('empl-end')?g('empl-end').value:'1234').padStart(4,'0');
   const emplEndMo=Math.min(12,Math.max(1,parseInt(raw.slice(0,2))||12));
   const emplEndYr=parseInt('20'+raw.slice(2))||2028;
+
+  // Read asset data from new configuration
+  const faData=getAssetData('fa');
+  const gwData=getAssetData('gw');
+  const propData=getAssetData('prop');
+  const absliData=getAssetData('absli');
+  const gratData=getAssetData('grat');
+  const msrData=getAssetData('msr');
+  const eqData=getAssetData('eq');
+  const sgdcData=getAssetData('sgdc');
+  const incrcData=getAssetData('inrc');
+  const inreqData=getAssetData('inreq');
+
   return{
     ctsh:+g('ctsh').value,
-    fa:(+g('fa').value||0)*1e7, facoa:(+g('facoa').value||0)*1e7, fatax:(+g('fatax').value||0)/100,
-    gw:(+g('gw').value||0)*1e5, gwcoa:(+g('gwcoa').value||0)*1e5, gwtax:(+g('gwtax').value||0)/100,
+    fa:faData.base*(faData.currency==='SGD'?parseFloat(g('sgdinr-n').value||63):1e7),
+    facoa:faData.coa*1e7,
+    fatax:faData.taxRate,
+    gw:gwData.base*(gwData.currency==='SGD'?parseFloat(g('sgdinr-n').value||63):1e5),
+    gwcoa:gwData.coa*1e5,
+    gwtax:gwData.taxRate,
     msrMo:{
       2026:+(g('msr-mo-2026')?g('msr-mo-2026').value:7),
       2027:+(g('msr-mo-2027')?g('msr-mo-2027').value:12),
       2028:+(g('msr-mo-2028')?g('msr-mo-2028').value:12),
       2029:+(g('msr-mo-2029')?g('msr-mo-2029').value:5),
     },
-    msr:+(g('msr')?g('msr').value:480000)||480000,
-    eq:+(g('eq')?g('eq').value:131000)||131000,
-    sgdc:+(g('sgdc')?g('sgdc').value:70000)||70000,
-    inrc:(+g('inrc').value||0)*1e5,
-    inreq:(+g('inreq').value||0)*1e5,
-    propval:(+g('propval').value||80)*1e5,
-    propyr:+g('propyr').value||2027,
-    absli:(+g('absli').value||21)*1e5,
-    absliyr:+g('absliyr').value||2031,
-    grat:(+g('grat').value||50)*1e5,
-    gratdelay:+g('gratdelay').value||6,
-    ret:+g('ret').value/100,
-    infl:+g('infl').value/100||0.03,
+    msr:msrData.base*1000,
+    eq:eqData.base*1000,
+    sgdc:sgdcData.base*1000,
+    inrc:incrcData.base*1e5,
+    inreq:inreqData.base*1e5,
+    propval:propData.base*1e5,
+    propyr:propData.liqYear,
+    absli:absliData.base*1e5,
+    absliyr:absliData.liqYear,
+    grat:gratData.base*1e5,
+    gratdelay:+(g('gratdelay')?g('gratdelay').value:6),
+    ret:+(g('ret')?g('ret').value:0.07)/100,
+    infl:+(g('infl')?g('infl').value:3)/100||0.03,
     endYr:+(g('end-yr')?g('end-yr').value:2035)||2035,
     usdinr:+(g('usdinr-n')?g('usdinr-n').value:84)||84,
     gbpinr:+(g('gbpinr-n')?g('gbpinr-n').value:107)||107,

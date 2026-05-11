@@ -284,6 +284,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <button class="tab-btn" data-tab="t-expenses" onclick="switchTab('t-expenses')">🏠 Expenses</button>
   <button class="tab-btn" data-tab="t-oneoff" onclick="switchTab('t-oneoff')">🎯 One-off</button>
   <button class="tab-btn" data-tab="t-gbp" onclick="switchTab('t-gbp')">🇬🇧 Rai &amp; Neil</button>
+  <button class="tab-btn" data-tab="t-eduloan" onclick="switchTab('t-eduloan')">🎓 Education Loan</button>
   <button class="tab-btn" data-tab="t-msr" onclick="switchTab('t-msr')">🏦 MSR</button>
 </div>
 
@@ -595,6 +596,184 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div>
 </div>
 
+<!-- ── TAB: Education Loan ── -->
+<div class="tab-pane" id="t-eduloan">
+<div class="section">
+  <div class="sec-title"><span class="sec-num">EL</span> Education loan — Daughter's UK LLM program</div>
+
+  <!-- SECTION A: Loan Configuration -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-eduloan-config')">
+      <span class="card-title">Loan configuration</span>
+      <span class="card-arrow open" id="arr-c-eduloan-config">▶</span>
+    </div>
+    <div class="card-body" id="c-eduloan-config">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
+        <!-- Principal Amount -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">LOAN AMOUNT (₹)</div>
+          <input type="number" id="eduloan-principal" value="2500000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" onchange="update()">
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-principal">₹25L</div>
+        </div>
+
+        <!-- Interest Rate -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">RATE (% p.a.)</div>
+          <div style="display:flex;gap:4px">
+            <input type="range" id="eduloan-rate" min="0" max="15" step="0.01" value="9.15" style="flex:1" onchange="update()">
+            <input type="number" id="eduloan-rate-n" value="9.15" step="0.01" min="0" max="15" style="width:60px;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;text-align:right" onchange="update()">
+          </div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-rate">9.15%</div>
+        </div>
+
+        <!-- Tenure (months) -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">TENURE (months)</div>
+          <input type="number" id="eduloan-tenure" value="84" step="1" min="12" max="360" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" onchange="update()">
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-tenure">84 months = 7 years</div>
+        </div>
+
+        <!-- Monthly EMI -->
+        <div style="background:var(--green-bg);padding:10px;border-radius:6px;border:1px solid var(--green-bdr)">
+          <div style="font-size:10px;color:var(--green);margin-bottom:4px;font-weight:600">MONTHLY EMI</div>
+          <div style="font-size:13px;color:var(--green);font-weight:600;font-family:'DM Mono',monospace" id="v-eduloan-emi">₹42.8K</div>
+        </div>
+
+        <!-- Moratorium Toggle -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">MORATORIUM</div>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px">
+            <input type="checkbox" id="eduloan-moratorium" onchange="update()" style="width:14px;height:14px;cursor:pointer">
+            <span id="v-eduloan-moratorium-label">None (EMI starts Oct 2027)</span>
+          </label>
+        </div>
+
+        <!-- Daughter's Repayment -->
+        <div style="background:var(--bg3);padding:10px;border-radius:6px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">DAUGHTER REPAY (₹/mo)</div>
+          <input type="number" id="eduloan-daughter-repay" value="1800000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" onchange="update()">
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-daughter-repay">₹18K</div>
+        </div>
+      </div>
+
+      <!-- Disbursement Period Info -->
+      <div style="padding:8px;background:var(--accent-bg);border-radius:6px;margin-bottom:12px;border:1px solid var(--accent-light)">
+        <div style="font-size:11px;color:var(--accent);margin-bottom:4px"><strong>Disbursement:</strong> Sept 2026 – Aug 2027 (9 months)</div>
+        <div style="font-size:11px;color:var(--accent)"><strong>EMI Period:</strong> <span id="v-eduloan-emi-start">Oct 2027</span> – Sept 2034 (84 months)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION B: Amortization Schedule -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-eduloan-amort')">
+      <span class="card-title">Amortization schedule</span>
+      <span class="card-arrow open" id="arr-c-eduloan-amort">▶</span>
+    </div>
+    <div class="card-body" id="c-eduloan-amort">
+      <div style="overflow-x:auto">
+        <table class="yr-tbl" id="eduloan-amort-tbl" style="width:100%"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION C: Cost Breakdown -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-eduloan-cost')">
+      <span class="card-title">Cost breakdown &amp; tax benefit</span>
+      <span class="card-arrow open" id="arr-c-eduloan-cost">▶</span>
+    </div>
+    <div class="card-body" id="c-eduloan-cost">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <!-- Left: Cost Components -->
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">EDUCATION COST</div>
+          <div style="background:var(--bg3);border-radius:6px;padding:10px;font-size:11px;line-height:1.8">
+            <div style="display:flex;justify-content:space-between">
+              <span>Tuition fees:</span>
+              <span id="v-cost-tuition" style="color:var(--accent);font-family:'DM Mono',monospace;font-weight:500">₹23.9L</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span>Living expenses:</span>
+              <span id="v-cost-living" style="color:var(--accent);font-family:'DM Mono',monospace;font-weight:500">₹24L</span>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:6px;display:flex;justify-content:space-between;font-weight:600">
+              <span>Total cost:</span>
+              <span id="v-cost-total" style="color:var(--green);font-family:'DM Mono',monospace">₹48L</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Loan & Funding -->
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">FUNDING BREAKDOWN</div>
+          <div style="background:var(--bg3);border-radius:6px;padding:10px;font-size:11px;line-height:1.8">
+            <div style="display:flex;justify-content:space-between">
+              <span>Loan amount:</span>
+              <span id="v-fund-loan" style="color:var(--accent);font-family:'DM Mono',monospace;font-weight:500">₹25L</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span>Parent covers:</span>
+              <span id="v-fund-parent" style="color:var(--accent);font-family:'DM Mono',monospace;font-weight:500">₹23L</span>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:6px;display:flex;justify-content:space-between;font-weight:600">
+              <span>Total:</span>
+              <span id="v-fund-total" style="color:var(--green);font-family:'DM Mono',monospace">₹48L</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tax Benefit -->
+      <div style="background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:6px;padding:12px;margin-top:12px">
+        <div style="font-size:11px;color:var(--green);margin-bottom:8px;font-weight:600">TAX BENEFIT (Section 80E)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:11px;line-height:1.8">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span>Total interest paid:</span>
+              <span id="v-tax-interest" style="color:var(--green);font-family:'DM Mono',monospace;font-weight:500">₹11.6L</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span>Tax bracket:</span>
+              <span style="color:var(--green);font-family:'DM Mono',monospace;font-weight:500">30%</span>
+            </div>
+          </div>
+          <div>
+            <div style="border-top:1px solid var(--green-bdr);padding-top:6px;display:flex;justify-content:space-between;font-weight:600">
+              <span>Tax benefit:</span>
+              <span id="v-tax-benefit" style="color:var(--green);font-family:'DM Mono',monospace">₹3.48L</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text3)">
+              <span>Net effective cost:</span>
+              <span id="v-cost-net-effective" style="color:var(--green);font-family:'DM Mono',monospace;font-weight:500">₹44.5L</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION D: Timeline -->
+  <div class="card">
+    <div class="card-hdr" onclick="toggleCard('c-eduloan-timeline')">
+      <span class="card-title">Timeline summary</span>
+      <span class="card-arrow open" id="arr-c-eduloan-timeline">▶</span>
+    </div>
+    <div class="card-body" id="c-eduloan-timeline">
+      <div style="background:var(--bg3);border-radius:6px;padding:12px;font-size:11px;line-height:2">
+        <div><strong>Course period:</strong> Sept 2026 – Sept 2027 (12 months)</div>
+        <div><strong>Disbursement period:</strong> Sept 2026 – Aug 2027 (9 months, ₹25L spread)</div>
+        <div><strong>Loan repayment:</strong> <span id="v-timeline-repay-start">Oct 2027</span> – Sept 2034 (84 months)</div>
+        <div><strong>Daughter contributes:</strong> 2028 onwards (₹18K/month, reduces parent obligation)</div>
+        <div><strong>Loan fully repaid:</strong> Sept 2034</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">Education loan disbursement appears as monthly GBP expense in Rai & Neil tab (Sept 2026–Aug 2027). EMI repayment appears as monthly GBP outflow starting Oct 2027. Daughter's repayment contribution offsets parent's EMI obligation from 2028 onwards. All loan parameters in INR; GBP conversions use live exchange rate.</div>
+</div>
+</div>
+
 <!-- ── TAB: MSR ── -->
 <div class="tab-pane" id="t-msr">
 <div class="tab-flow-bar" id="flow-msr"></div>
@@ -799,6 +978,80 @@ function updateSalaryDisplay(){
   st('v-salary-monthly',fI(monthlyNet)+'/month');
 }
 
+// Education Loan: Update display values
+function updateEduLoanDisplay(){
+  const principal=+(g('eduloan-principal')?g('eduloan-principal').value:2500000);
+  const rateAnnual=+(g('eduloan-rate')?g('eduloan-rate').value:9.15);
+  const tenureMonths=+(g('eduloan-tenure')?g('eduloan-tenure').value:84);
+  const moratorium=g('eduloan-moratorium')&&g('eduloan-moratorium').checked;
+  const daughterRepay=+(g('eduloan-daughter-repay')?g('eduloan-daughter-repay').value:1800000);
+
+  // Calculate EMI
+  const emi=calculateEMI(principal, rateAnnual/100, tenureMonths);
+
+  // EMI start date (with moratorium if applicable)
+  const emiStartYr=moratorium?2028:2027;
+  const emiStartMo=moratorium?10:10;
+
+  // Generate amortization schedule
+  const schedule=generateAmortizationSchedule(principal, rateAnnual/100, tenureMonths, emiStartYr, emiStartMo);
+
+  // Calculate total interest
+  const totalInterest=schedule.reduce((s,y)=>s+y.interest,0);
+  const taxBenefit=totalInterest*0.30;
+  const educationCost=2390000+2400000; // tuition + living
+  const parentCover=educationCost-principal;
+  const netEffectiveCost=educationCost-taxBenefit;
+
+  // Update display values
+  st('v-eduloan-principal',fI(principal));
+  st('v-eduloan-rate',(rateAnnual).toFixed(2)+'%');
+  st('v-eduloan-tenure',tenureMonths+' months = '+Math.round(tenureMonths/12)+' years');
+  st('v-eduloan-emi',fI(Math.round(emi)));
+  st('v-eduloan-moratorium-label',moratorium?'1-year moratorium (EMI starts Oct 2028)':'None (EMI starts Oct 2027)');
+  st('v-eduloan-daughter-repay',fI(daughterRepay));
+  st('v-eduloan-emi-start',moratorium?'Oct 2028':'Oct 2027');
+  st('v-timeline-repay-start',moratorium?'Oct 2028':'Oct 2027');
+
+  // Cost breakdown
+  st('v-cost-tuition',fI(2390000));
+  st('v-cost-living',fI(2400000));
+  st('v-cost-total',fI(educationCost));
+  st('v-fund-loan',fI(principal));
+  st('v-fund-parent',fI(parentCover));
+  st('v-fund-total',fI(educationCost));
+
+  // Tax benefit
+  st('v-tax-interest',fI(Math.round(totalInterest)));
+  st('v-tax-benefit',fI(Math.round(taxBenefit)));
+  st('v-cost-net-effective',fI(Math.round(netEffectiveCost)));
+
+  // Render amortization table
+  renderEduLoanTable(schedule);
+}
+
+// Education Loan: Render amortization schedule table
+function renderEduLoanTable(schedule){
+  const tbl=g('eduloan-amort-tbl');
+  if(!tbl)return;
+
+  const rows=schedule.map(y=>`<tr>
+    <td style="text-align:center;font-weight:600">${y.year}</td>
+    <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${fI(Math.round(y.principal))}</td>
+    <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px">${fI(Math.round(y.interest))}</td>
+    <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);font-weight:500">${fI(Math.round(y.emi))}</td>
+    <td style="text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--green)">${fI(Math.round(y.balance))}</td>
+  </tr>`).join('');
+
+  tbl.innerHTML=`<thead><tr>
+    <th style="text-align:center;font-size:10px">Year</th>
+    <th style="text-align:right;font-size:10px">Principal</th>
+    <th style="text-align:right;font-size:10px">Interest</th>
+    <th style="text-align:right;font-size:10px">EMI</th>
+    <th style="text-align:right;font-size:10px">Balance</th>
+  </tr></thead><tbody>${rows}</tbody>`;
+}
+
 // Asset configuration management
 let assetView='INR'; // Current view: INR or SGD
 const assetList=['fa','gw','prop','absli','grat','msr','eq','sgdc','inrc','inreq'];
@@ -944,6 +1197,16 @@ function getP(){
     // Salary configuration - read from context bar input controls
     salaryGross, salaryTaxRate, salaryTaxAmount, salaryNet,
     emplOn, emplEndMo, emplEndYr,
+    // Education loan parameters
+    eduLoan:{
+      principal:+(g('eduloan-principal')?g('eduloan-principal').value:2500000),
+      rateAnnual:+(g('eduloan-rate')?g('eduloan-rate').value:9.15)/100,
+      tenureMonths:+(g('eduloan-tenure')?g('eduloan-tenure').value:84),
+      moratoriumMonths:(g('eduloan-moratorium')&&g('eduloan-moratorium').checked)?12:0,
+      daughterRepaymentMonthly:+(g('eduloan-daughter-repay')?g('eduloan-daughter-repay').value:1800000),
+      costTuition:2390000,
+      costLiving:2400000,
+    },
     tFa:1, tGw:1,
   };
 }
@@ -953,6 +1216,61 @@ function totM(){return monthlyExp.reduce((s,e)=>s+e.val,0)}
 function totQ(){return quarterlyExp.reduce((s,e)=>s+e.val,0)}
 function rowAnnualGBP(row,yr){return row.rate*(row.mo[yr]||0);}
 function personYrGBP(rows,yr){return rows.reduce((s,r)=>s+rowAnnualGBP(r,yr),0);}
+
+// Education Loan: Calculate EMI using standard amortization formula
+// EMI = P × r × (1+r)^n / ((1+r)^n - 1), where r = monthly rate, n = months
+function calculateEMI(principal, rateAnnual, tenureMonths){
+  if(tenureMonths<=0||principal<=0) return 0;
+  const rateMonthly=rateAnnual/12;
+  if(rateMonthly===0) return principal/tenureMonths;
+  const numerator=principal*rateMonthly*Math.pow(1+rateMonthly,tenureMonths);
+  const denominator=Math.pow(1+rateMonthly,tenureMonths)-1;
+  return numerator/denominator;
+}
+
+// Education Loan: Generate year-by-year amortization schedule
+function generateAmortizationSchedule(principal, rateAnnual, tenureMonths, emiStartYr, emiStartMo){
+  const schedule=[];
+  const emi=calculateEMI(principal, rateAnnual, tenureMonths);
+  let balance=principal;
+  let monthsPaid=0;
+  let currentYr=emiStartYr;
+  let currentMo=emiStartMo;
+
+  // Year-by-year accumulation
+  while(monthsPaid<tenureMonths&&currentYr<=2050){
+    let yearPrincipal=0, yearInterest=0, yearEMI=0;
+    let monthsInYear=0;
+
+    // Count months in this year that fall within tenure
+    for(let mo=currentMo;mo<=12&&monthsPaid<tenureMonths;mo++){
+      monthsInYear++;
+      monthsPaid++;
+
+      const interest=balance*rateAnnual/12;
+      const principalPayment=emi-interest;
+      yearPrincipal+=principalPayment;
+      yearInterest+=interest;
+      yearEMI+=emi;
+      balance-=principalPayment;
+    }
+
+    if(monthsInYear>0){
+      schedule.push({
+        year:currentYr,
+        principal:yearPrincipal,
+        interest:yearInterest,
+        emi:yearEMI,
+        balance:Math.max(0,balance),
+      });
+    }
+
+    currentYr++;
+    currentMo=1; // From next year onwards, months start from Jan
+  }
+
+  return schedule;
+}
 
 // How many months of salary/RSU in a given year based on end date
 function emplMonthsInYear(yr, p){
@@ -1818,6 +2136,15 @@ function syncPair(sId,nId){
 }
 ['ctsh','ret','infl','salary-tax-rate'].forEach(id=>syncPair(id,id+'-n'));
 
+// Sync education loan rate slider and number input
+function syncEduLoanPair(sId,nId){
+  const sl=g(sId),inp=g(nId);
+  if(!sl||!inp)return;
+  sl.addEventListener('input',()=>{inp.value=sl.value;update();updateEduLoanDisplay();});
+  inp.addEventListener('input',()=>{sl.value=inp.value;update();updateEduLoanDisplay();});
+}
+syncEduLoanPair('eduloan-rate','eduloan-rate-n');
+
 // Populate employment end dropdown: Jun 2026 → Dec 2034
 (function(){
   const sel=g('empl-end');if(!sel)return;
@@ -1843,8 +2170,18 @@ if(g('salary-gross')){
   g('salary-gross').addEventListener('input',()=>{update();updateSalaryDisplay();});
 }
 
+// Handle education loan input changes
+['eduloan-principal','eduloan-rate','eduloan-tenure','eduloan-moratorium','eduloan-daughter-repay'].forEach(id=>{
+  const el=g(id);
+  if(el){
+    const event=id==='eduloan-moratorium'?'change':'input';
+    el.addEventListener(event,()=>{update();updateEduLoanDisplay();});
+  }
+});
+
 update();
 updateSalaryDisplay();
+updateEduLoanDisplay();
 </script>
 </body>
 </html>

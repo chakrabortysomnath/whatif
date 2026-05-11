@@ -1486,13 +1486,63 @@ function buildYears(p){
     const india=(totM()*12+totQ()*4)*inflFactor;
     const rai=personYrGBP(raiRows,yr)*p.gbpinr*inflFactor;
     const neil=personYrGBP(neilRows,yr)*p.gbpinr*inflFactor;
+
+    // Education Loan: Calculate disbursement and EMI for this year
+    let eduLoanOut=0;
+    if(p.eduLoan){
+      // Disbursement: ₹25L spread over 9 months (Sept 2026 for 9 months = Sept 2026 - May 2027)
+      const disbursalMonthlyINR=p.eduLoan.principal/9;
+      const disbursalMonthlyGBP=disbursalMonthlyINR/p.gbpinr;
+
+      // EMI: Monthly payment starting Oct 2027 or Oct 2028 (with moratorium)
+      const emiMonthlyINR=calculateEMI(p.eduLoan.principal, p.eduLoan.rateAnnual, p.eduLoan.tenureMonths);
+      const emiMonthlyGBP=emiMonthlyINR/p.gbpinr;
+      const daughterRepayGBP=p.eduLoan.daughterRepaymentMonthly/p.gbpinr;
+      const parentEMIGBP=Math.max(0,emiMonthlyGBP-daughterRepayGBP);
+
+      const emiStartYr=p.eduLoan.moratoriumMonths>0?2028:2027;
+      const emiStartMo=10;
+      const emiEndYr=2034;
+      const emiEndMo=9;
+      const daughterStartYr=2028;
+
+      // Disbursement: Sept 2026 - May 2027 (9 months)
+      if(yr===2026){
+        eduLoanOut+=disbursalMonthlyGBP*4; // Sept-Dec 2026 (4 months)
+      } else if(yr===2027){
+        eduLoanOut+=disbursalMonthlyGBP*5; // Jan-May 2027 (5 months)
+      }
+
+      // EMI: Oct 2027/2028 - Sept 2034
+      if(yr===emiStartYr){
+        // Oct-Dec of start year (3 months)
+        let emiMo=3;
+        if(yr===daughterStartYr&&yr!==emiStartYr){
+          // Daughter contributes for some months this year
+          emiMo=Math.min(12,emiEndMo)-Math.max(1,emiStartMo)+1;
+        }
+        eduLoanOut+=parentEMIGBP*emiMo;
+      } else if(yr>emiStartYr&&yr<emiEndYr){
+        // Full year of EMI
+        eduLoanOut+=parentEMIGBP*12;
+      } else if(yr===emiEndYr){
+        // Sept 2034 (9 months)
+        eduLoanOut+=parentEMIGBP*9;
+      }
+
+      // Daughter repayment contribution (reduces parent's obligation)
+      // This is already subtracted in parentEMIGBP calculation above
+    }
+
+    const eduLoanOutINR=eduLoanOut*p.gbpinr;
+
     const oneOff=oneOffRows.reduce((s,r)=>s+(yr===r.year?r.amount:0),0);
     const totalIn=sal+rsu+faI+gwI+prop+absliI+gratI+sgdLiq+msrI+ret+swpIncome;
-    const totalOut=msrO+india+rai+neil+oneOff;
+    const totalOut=msrO+india+rai+neil+oneOff+eduLoanOutINR;
     const net=totalIn-totalOut;
     const close=open+net;
     inrBal=close;
-    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,swpIncome,oneOff,net,close};
+    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,swpIncome,oneOff,eduLoan:eduLoanOutINR,net,close};
   });
 }
 

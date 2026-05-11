@@ -2177,6 +2177,8 @@ function update(){
     {l:'India expenses',cls:'out',v:ydata.map(d=>'('+fI(d.india)+')')},
     {l:'Rai / Trisha (GBP→INR)',cls:'out',v:ydata.map(d=>d.rai>0?'('+fI(d.rai)+')':'—')},
     {l:'Neil / Ayush (GBP→INR)',cls:'out',v:ydata.map(d=>d.neil>0?'('+fI(d.neil)+')':'—')},
+    {l:'Education Loan in',cls:'inc',v:ydata.map(d=>d.eduLoanIn>0?fI(d.eduLoanIn):'—')},
+    {l:'Education Loan EMI',cls:'out',v:ydata.map(d=>d.eduLoanOut>0?'('+fI(d.eduLoanOut)+')':'—')},
     {l:'One-off expenses',cls:'out',v:ydata.map(d=>d.oneOff>0?'('+fI(d.oneOff)+')':'—')},
     {l:'Net cash flow',cls:'net',v:ydata.map(d=>`<span class="${d.net>=0?'pos':'neg'}">${d.net<0?'('+fI(Math.abs(d.net))+')':fI(d.net)}</span>`)},
     {l:'Closing balance',cls:'bal',b:true,v:ydata.map(d=>`<span class="${d.close>=0?'pos':'neg'}">${d.close<0?'('+fI(Math.abs(d.close))+')':fI(d.close)}</span>`)},
@@ -2199,6 +2201,7 @@ function update(){
   flowBar('flow-swp','SWP income (₹)',ydata.map(d=>d.swpIncome),v=>fI(v));
   flowBar('flow-expenses','India expenses (₹)',ydata.map(d=>d.india),v=>fI(v));
   flowBar('flow-gbp','GBP expenses (₹)',ydata.map(d=>d.rai+d.neil),v=>fI(v));
+  flowBar('flow-eduloan','Education Loan (₹)',ydata.map(d=>d.eduLoanIn-d.eduLoanOut),v=>fI(v));
   flowBar('flow-msr','MSR premium out (₹)',ydata.map(d=>d.msrO),v=>fI(v));
   flowBar('flow-oneoff','One-off expenses (₹)',ydata.map(d=>d.oneOff),v=>fI(v));
 }

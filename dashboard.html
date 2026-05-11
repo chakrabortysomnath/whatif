@@ -978,6 +978,36 @@ function updateSalaryDisplay(){
   st('v-salary-monthly',fI(monthlyNet)+'/month');
 }
 
+// Education Loan: Save parameters to localStorage
+function saveEduLoanConfig(){
+  const principal=+(g('eduloan-principal')?g('eduloan-principal').value:2500000);
+  const rateAnnual=+(g('eduloan-rate')?g('eduloan-rate').value:9.15);
+  const tenureMonths=+(g('eduloan-tenure')?g('eduloan-tenure').value:84);
+  const moratorium=g('eduloan-moratorium')&&g('eduloan-moratorium').checked;
+  const daughterRepay=+(g('eduloan-daughter-repay')?g('eduloan-daughter-repay').value:1800000);
+
+  localStorage.setItem('eduloan_principal',principal);
+  localStorage.setItem('eduloan_rate',rateAnnual);
+  localStorage.setItem('eduloan_tenure',tenureMonths);
+  localStorage.setItem('eduloan_moratorium',moratorium?'1':'0');
+  localStorage.setItem('eduloan_daughter_repay',daughterRepay);
+}
+
+// Education Loan: Load parameters from localStorage
+function loadEduLoanConfig(){
+  const principal=localStorage.getItem('eduloan_principal')||'2500000';
+  const rateAnnual=localStorage.getItem('eduloan_rate')||'9.15';
+  const tenureMonths=localStorage.getItem('eduloan_tenure')||'84';
+  const moratorium=localStorage.getItem('eduloan_moratorium')==='1';
+  const daughterRepay=localStorage.getItem('eduloan_daughter_repay')||'1800000';
+
+  if(g('eduloan-principal'))g('eduloan-principal').value=principal;
+  if(g('eduloan-rate')){g('eduloan-rate').value=rateAnnual;g('eduloan-rate-n').value=rateAnnual;}
+  if(g('eduloan-tenure'))g('eduloan-tenure').value=tenureMonths;
+  if(g('eduloan-moratorium'))g('eduloan-moratorium').checked=moratorium;
+  if(g('eduloan-daughter-repay'))g('eduloan-daughter-repay').value=daughterRepay;
+}
+
 // Education Loan: Update display values
 function updateEduLoanDisplay(){
   const principal=+(g('eduloan-principal')?g('eduloan-principal').value:2500000);
@@ -2190,8 +2220,8 @@ function syncPair(sId,nId){
 function syncEduLoanPair(sId,nId){
   const sl=g(sId),inp=g(nId);
   if(!sl||!inp)return;
-  sl.addEventListener('input',()=>{inp.value=sl.value;update();updateEduLoanDisplay();});
-  inp.addEventListener('input',()=>{sl.value=inp.value;update();updateEduLoanDisplay();});
+  sl.addEventListener('input',()=>{inp.value=sl.value;saveEduLoanConfig();update();updateEduLoanDisplay();});
+  inp.addEventListener('input',()=>{sl.value=inp.value;saveEduLoanConfig();update();updateEduLoanDisplay();});
 }
 syncEduLoanPair('eduloan-rate','eduloan-rate-n');
 
@@ -2225,9 +2255,12 @@ if(g('salary-gross')){
   const el=g(id);
   if(el){
     const event=id==='eduloan-moratorium'?'change':'input';
-    el.addEventListener(event,()=>{update();updateEduLoanDisplay();});
+    el.addEventListener(event,()=>{saveEduLoanConfig();update();updateEduLoanDisplay();});
   }
 });
+
+// Load persisted configurations
+loadEduLoanConfig();
 
 update();
 updateSalaryDisplay();

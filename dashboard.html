@@ -611,9 +611,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">
         <!-- Principal Amount -->
         <div style="background:var(--bg3);padding:10px;border-radius:6px">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">LOAN AMOUNT (₹)</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">LOAN AMOUNT (INR base)</div>
           <input type="number" id="eduloan-principal" value="2500000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" onchange="update()">
-          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-principal">₹25L</div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-principal">£0</div>
         </div>
 
         <!-- Interest Rate -->
@@ -635,8 +635,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
         <!-- Monthly EMI -->
         <div style="background:var(--green-bg);padding:10px;border-radius:6px;border:1px solid var(--green-bdr)">
-          <div style="font-size:10px;color:var(--green);margin-bottom:4px;font-weight:600">MONTHLY EMI</div>
-          <div style="font-size:13px;color:var(--green);font-weight:600;font-family:'DM Mono',monospace" id="v-eduloan-emi">₹42.8K</div>
+          <div style="font-size:10px;color:var(--green);margin-bottom:4px;font-weight:600">MONTHLY EMI (GBP)</div>
+          <div style="font-size:13px;color:var(--green);font-weight:600;font-family:'DM Mono',monospace" id="v-eduloan-emi">£0</div>
         </div>
 
         <!-- Moratorium Toggle -->
@@ -650,9 +650,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
         <!-- Daughter's Repayment -->
         <div style="background:var(--bg3);padding:10px;border-radius:6px">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">DAUGHTER REPAY (₹/mo)</div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">DAUGHTER REPAY (INR base)</div>
           <input type="number" id="eduloan-daughter-repay" value="1800000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" onchange="update()">
-          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-daughter-repay">₹18K</div>
+          <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-daughter-repay">£0</div>
         </div>
       </div>
 
@@ -687,7 +687,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <!-- Left: Cost Components -->
         <div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">EDUCATION COST</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">EDUCATION COST (GBP)</div>
           <div style="background:var(--bg3);border-radius:6px;padding:10px;font-size:11px;line-height:1.8">
             <div style="display:flex;justify-content:space-between">
               <span>Tuition fees:</span>
@@ -706,7 +706,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
         <!-- Right: Loan & Funding -->
         <div>
-          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">FUNDING BREAKDOWN</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">FUNDING BREAKDOWN (GBP)</div>
           <div style="background:var(--bg3);border-radius:6px;padding:10px;font-size:11px;line-height:1.8">
             <div style="display:flex;justify-content:space-between">
               <span>Loan amount:</span>
@@ -726,7 +726,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
       <!-- Tax Benefit -->
       <div style="background:var(--green-bg);border:1px solid var(--green-bdr);border-radius:6px;padding:12px;margin-top:12px">
-        <div style="font-size:11px;color:var(--green);margin-bottom:8px;font-weight:600">TAX BENEFIT (Section 80E)</div>
+        <div style="font-size:11px;color:var(--green);margin-bottom:8px;font-weight:600">TAX BENEFIT @ 30% (GBP)</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:11px;line-height:1.8">
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px">
@@ -1008,53 +1008,68 @@ function loadEduLoanConfig(){
   if(g('eduloan-daughter-repay'))g('eduloan-daughter-repay').value=daughterRepay;
 }
 
-// Education Loan: Update display values
+// Education Loan: Update display values (all in GBP)
 function updateEduLoanDisplay(){
-  const principal=+(g('eduloan-principal')?g('eduloan-principal').value:2500000);
+  const p=getP(); // Get current parameters including exchange rates
+  const principalINR=+(g('eduloan-principal')?g('eduloan-principal').value:2500000);
+  const principalGBP=principalINR/p.gbpinr;
+
   const rateAnnual=+(g('eduloan-rate')?g('eduloan-rate').value:9.15);
   const tenureMonths=+(g('eduloan-tenure')?g('eduloan-tenure').value:84);
   const moratorium=g('eduloan-moratorium')&&g('eduloan-moratorium').checked;
-  const daughterRepay=+(g('eduloan-daughter-repay')?g('eduloan-daughter-repay').value:1800000);
+  const daughterRepayINR=+(g('eduloan-daughter-repay')?g('eduloan-daughter-repay').value:1800000);
+  const daughterRepayGBP=daughterRepayINR/p.gbpinr;
 
-  // Calculate EMI
-  const emi=calculateEMI(principal, rateAnnual/100, tenureMonths);
+  // Calculate EMI in INR first, then convert to GBP
+  const emiINR=calculateEMI(principalINR, rateAnnual/100, tenureMonths);
+  const emiGBP=emiINR/p.gbpinr;
+  const parentEMIGBP=Math.max(0,emiGBP-daughterRepayGBP);
 
   // EMI start date (with moratorium if applicable)
   const emiStartYr=moratorium?2028:2027;
   const emiStartMo=moratorium?10:10;
 
-  // Generate amortization schedule
-  const schedule=generateAmortizationSchedule(principal, rateAnnual/100, tenureMonths, emiStartYr, emiStartMo);
+  // Generate amortization schedule (in INR, then convert columns to GBP)
+  const scheduleINR=generateAmortizationSchedule(principalINR, rateAnnual/100, tenureMonths, emiStartYr, emiStartMo);
+  const schedule=scheduleINR.map(yr=>({
+    year:yr.year,
+    principal:yr.principal/p.gbpinr,
+    interest:yr.interest/p.gbpinr,
+    emi:yr.emi/p.gbpinr,
+    balance:yr.balance/p.gbpinr
+  }));
 
-  // Calculate total interest
-  const totalInterest=schedule.reduce((s,y)=>s+y.interest,0);
-  const taxBenefit=totalInterest*0.30;
-  const educationCost=2390000+2400000; // tuition + living
-  const parentCover=educationCost-principal;
-  const netEffectiveCost=educationCost-taxBenefit;
+  // Calculate total interest (in GBP)
+  const totalInterestGBP=schedule.reduce((s,y)=>s+y.interest,0);
+  const taxBenefit=totalInterestGBP*0.30; // Tax benefit in GBP (but typically calculated on INR basis)
+  const tuitionGBP=2390000/p.gbpinr;
+  const livingGBP=2400000/p.gbpinr;
+  const educationCostGBP=tuitionGBP+livingGBP;
+  const parentCoverGBP=educationCostGBP-principalGBP;
+  const netEffectiveCostGBP=educationCostGBP-taxBenefit;
 
-  // Update display values
-  st('v-eduloan-principal',fI(principal));
+  // Update display values (all in GBP now)
+  st('v-eduloan-principal',fG(principalGBP));
   st('v-eduloan-rate',(rateAnnual).toFixed(2)+'%');
   st('v-eduloan-tenure',tenureMonths+' months = '+Math.round(tenureMonths/12)+' years');
-  st('v-eduloan-emi',fI(Math.round(emi)));
+  st('v-eduloan-emi',fG(emiGBP));
   st('v-eduloan-moratorium-label',moratorium?'1-year moratorium (EMI starts Oct 2028)':'None (EMI starts Oct 2027)');
-  st('v-eduloan-daughter-repay',fI(daughterRepay));
+  st('v-eduloan-daughter-repay',fG(daughterRepayGBP));
   st('v-eduloan-emi-start',moratorium?'Oct 2028':'Oct 2027');
   st('v-timeline-repay-start',moratorium?'Oct 2028':'Oct 2027');
 
-  // Cost breakdown
-  st('v-cost-tuition',fI(2390000));
-  st('v-cost-living',fI(2400000));
-  st('v-cost-total',fI(educationCost));
-  st('v-fund-loan',fI(principal));
-  st('v-fund-parent',fI(parentCover));
-  st('v-fund-total',fI(educationCost));
+  // Cost breakdown (all in GBP)
+  st('v-cost-tuition',fG(tuitionGBP));
+  st('v-cost-living',fG(livingGBP));
+  st('v-cost-total',fG(educationCostGBP));
+  st('v-fund-loan',fG(principalGBP));
+  st('v-fund-parent',fG(parentCoverGBP));
+  st('v-fund-total',fG(educationCostGBP));
 
-  // Tax benefit
-  st('v-tax-interest',fI(Math.round(totalInterest)));
-  st('v-tax-benefit',fI(Math.round(taxBenefit)));
-  st('v-cost-net-effective',fI(Math.round(netEffectiveCost)));
+  // Tax benefit (in GBP)
+  st('v-tax-interest',fG(totalInterestGBP));
+  st('v-tax-benefit',fG(taxBenefit));
+  st('v-cost-net-effective',fG(netEffectiveCostGBP));
 
   // Render amortization table
   renderEduLoanTable(schedule);
@@ -1517,62 +1532,49 @@ function buildYears(p){
     const rai=personYrGBP(raiRows,yr)*p.gbpinr*inflFactor;
     const neil=personYrGBP(neilRows,yr)*p.gbpinr*inflFactor;
 
-    // Education Loan: Calculate disbursement and EMI for this year
-    let eduLoanOut=0;
+    // Education Loan: Calculate disbursement (INFLOW) and EMI (OUTFLOW)
+    let eduLoanIn=0;  // Loan disbursement - INFLOW to parent
+    let eduLoanOut=0; // EMI repayment - OUTFLOW from parent
+
     if(p.eduLoan){
-      // Disbursement: ₹25L spread over 9 months (Sept 2026 for 9 months = Sept 2026 - May 2027)
-      const disbursalMonthlyINR=p.eduLoan.principal/9;
-      const disbursalMonthlyGBP=disbursalMonthlyINR/p.gbpinr;
+      // Disbursement: ₹25L spread over 9 months (Sept 2026 - May 2027)
+      const disbursalMonthlyGBP=p.eduLoan.principal/9/p.gbpinr;
 
       // EMI: Monthly payment starting Oct 2027 or Oct 2028 (with moratorium)
-      const emiMonthlyINR=calculateEMI(p.eduLoan.principal, p.eduLoan.rateAnnual, p.eduLoan.tenureMonths);
-      const emiMonthlyGBP=emiMonthlyINR/p.gbpinr;
+      const emiMonthlyGBP=calculateEMI(p.eduLoan.principal, p.eduLoan.rateAnnual, p.eduLoan.tenureMonths)/p.gbpinr;
       const daughterRepayGBP=p.eduLoan.daughterRepaymentMonthly/p.gbpinr;
       const parentEMIGBP=Math.max(0,emiMonthlyGBP-daughterRepayGBP);
 
       const emiStartYr=p.eduLoan.moratoriumMonths>0?2028:2027;
-      const emiStartMo=10;
       const emiEndYr=2034;
-      const emiEndMo=9;
-      const daughterStartYr=2028;
 
-      // Disbursement: Sept 2026 - May 2027 (9 months)
+      // DISBURSEMENT INFLOW: Sept 2026 - May 2027 (9 months total)
       if(yr===2026){
-        eduLoanOut+=disbursalMonthlyGBP*4; // Sept-Dec 2026 (4 months)
+        eduLoanIn+=disbursalMonthlyGBP*4; // Sept-Dec 2026 (4 months)
       } else if(yr===2027){
-        eduLoanOut+=disbursalMonthlyGBP*5; // Jan-May 2027 (5 months)
+        eduLoanIn+=disbursalMonthlyGBP*5; // Jan-May 2027 (5 months)
       }
 
-      // EMI: Oct 2027/2028 - Sept 2034
+      // EMI OUTFLOW: Oct 2027/2028 - Sept 2034
       if(yr===emiStartYr){
-        // Oct-Dec of start year (3 months)
-        let emiMo=3;
-        if(yr===daughterStartYr&&yr!==emiStartYr){
-          // Daughter contributes for some months this year
-          emiMo=Math.min(12,emiEndMo)-Math.max(1,emiStartMo)+1;
-        }
-        eduLoanOut+=parentEMIGBP*emiMo;
+        eduLoanOut+=parentEMIGBP*3; // Oct-Dec (3 months)
       } else if(yr>emiStartYr&&yr<emiEndYr){
-        // Full year of EMI
-        eduLoanOut+=parentEMIGBP*12;
+        eduLoanOut+=parentEMIGBP*12; // Full year
       } else if(yr===emiEndYr){
-        // Sept 2034 (9 months)
-        eduLoanOut+=parentEMIGBP*9;
+        eduLoanOut+=parentEMIGBP*9; // Jan-Sept (9 months)
       }
-
-      // Daughter repayment contribution (reduces parent's obligation)
-      // This is already subtracted in parentEMIGBP calculation above
     }
 
+    const eduLoanInINR=eduLoanIn*p.gbpinr;
     const eduLoanOutINR=eduLoanOut*p.gbpinr;
 
     const oneOff=oneOffRows.reduce((s,r)=>s+(yr===r.year?r.amount:0),0);
-    const totalIn=sal+rsu+faI+gwI+prop+absliI+gratI+sgdLiq+msrI+ret+swpIncome;
+    const totalIn=sal+rsu+faI+gwI+prop+absliI+gratI+sgdLiq+msrI+ret+swpIncome+eduLoanInINR;
     const totalOut=msrO+india+rai+neil+oneOff+eduLoanOutINR;
     const net=totalIn-totalOut;
     const close=open+net;
     inrBal=close;
-    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,swpIncome,oneOff,eduLoan:eduLoanOutINR,net,close};
+    return{yr,open,ret,sal,rsu,faI,gwI,prop,absliI,gratI,sgdLiq,msrI,msrO,india,rai,neil,swpIncome,oneOff,eduLoanIn:eduLoanInINR,eduLoanOut:eduLoanOutINR,net,close};
   });
 }
 

@@ -336,12 +336,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <div style="overflow-x:auto;margin-bottom:20px">
         <div id="asset-grid"></div>
       </div>
-      <div style="border-top:2px solid var(--border);padding-top:16px">
-        <div style="font-size:12px;font-weight:600;margin-bottom:12px">Asset Liquidity Breakdown (Year-by-Year)</div>
-        <div style="overflow-x:auto">
-          <div id="asset-summary-grid"></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -651,7 +645,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
         <!-- Daughter's Repayment -->
         <div style="background:var(--bg3);padding:10px;border-radius:6px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600">DAUGHTER REPAY (INR base)</div>
-          <input type="number" id="eduloan-daughter-repay" value="1800000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" onchange="update()">
+          <input type="number" id="eduloan-daughter-repay" value="1800000" step="100000" min="0" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;box-sizing:border-box" oninput="saveEduLoanConfig();update();updateEduLoanDisplay()" onchange="saveEduLoanConfig();update();updateEduLoanDisplay()">
           <div style="font-size:10px;color:var(--accent);margin-top:4px" id="v-eduloan-daughter-repay">£0</div>
         </div>
       </div>
@@ -804,6 +798,65 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div><!-- end .page -->
 
 <script>
+// ════════════════════════════════════════════════════════════════════════════
+// ═══ CONFIGURATION: All runtime-configurable values ════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+const CONFIG = {
+  // Asset defaults: {base, coa (cost of acquisition), tax (%), defaultCur}
+  assets: {
+    fa: {base: 420000000, coa: 150000000, tax: 15, defaultCur: 'INR'},
+    gw: {base: 4500000, coa: 3500000, tax: 15, defaultCur: 'INR'},
+    prop: {base: 1000000, coa: 320000, tax: 15, defaultCur: 'INR'},
+    absli: {base: 2175000, coa: 1500000, tax: 13, defaultCur: 'INR'},
+    grat: {base: 5500000, coa: 550000, tax: 10, defaultCur: 'INR'},
+    msr: {base: 480000, coa: 0, tax: 0, defaultCur: 'SGD'},
+    eq: {base: 131000, coa: 0, tax: 0, defaultCur: 'SGD'},
+    sgdc: {base: 70000, coa: 0, tax: 0, defaultCur: 'SGD'},
+    inrc: {base: 1700000, coa: 0, tax: 0, defaultCur: 'INR'},
+    inreq: {base: 190000, coa: 100000, tax: 15, defaultCur: 'INR'},
+  },
+  // Monthly & quarterly expense defaults
+  expenses: {
+    monthly: [
+      {id: 50, name: 'Baba', val: 50000},
+      {id: 51, name: 'Ma', val: 60000},
+      {id: 52, name: 'Salary 1', val: 15000},
+      {id: 53, name: 'Salary 2', val: 20000},
+      {id: 54, name: 'Medicine', val: 15000},
+      {id: 55, name: 'Other', val: 15000},
+      {id: 56, name: 'Utilities', val: 80000},
+      {id: 57, name: 'Insurance', val: 33000},
+      {id: 58, name: 'Misc', val: 30000}
+    ],
+    quarterly: [
+      {id: 101, name: 'Tukun', val: 50000},
+      {id: 102, name: 'Travel', val: 200000}
+    ]
+  },
+  // Education loan defaults
+  eduLoan: {
+    principal: 2500000,           // ₹25L
+    rateAnnual: 9.15,             // 9.15% p.a.
+    tenureMonths: 84,             // 84 months = 7 years
+    tuition: 2390000,             // ₹23.9L
+    living: 2400000,              // ₹24L
+    daughterRepaymentMonthly: 1800000  // ₹18K/month default
+  },
+  // One-off expenses defaults
+  oneOff: {
+    raiMarriage: 10000000,        // ₹1 Cr
+    neilMarriage: 10000000        // ₹1 Cr
+  },
+  // Employment defaults
+  employment: {
+    salaryGross: 5300000,         // ₹53L/year
+    salaryTaxRate: 30,            // 30%
+    startMo: 6,                   // June (month 6) 2026
+    startYr: 2026,                // 2026
+    gratDelay: 6                  // 6 months after employment ends
+  }
+};
+
 let YEARS=[2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
 const SAL_ANNUAL=9600000; // ₹96 lakhs per year = ₹8 lakhs per month
 
@@ -1150,14 +1203,14 @@ function toggleAssetView(view){
 }
 
 function initializeAssetData(){
-  // Initialize asset data with defaults if not already set (stored as full INR values)
+  // Initialize asset data with defaults from CONFIG if not already set
   const defaults={
-    fa:{base:42000000,currency:'INR',coa:15000000,tax:30,liqYear:2026},
-    gw:{base:4500000,currency:'INR',coa:3500000,tax:30,liqYear:2026},
-    prop:{base:10000000,currency:'INR',coa:3200000,tax:15,liqYear:2027},
-    absli:{base:2175000,currency:'INR',coa:1500000,tax:13,liqYear:2031},
-    grat:{base:5500000,currency:'INR',coa:550000,tax:10,liqYear:2032},
-    msr:{base:480000,currency:'SGD',coa:0,tax:0,liqYear:2029},
+    fa:{base:CONFIG.assets.fa.base,currency:'INR',coa:CONFIG.assets.fa.coa,tax:CONFIG.assets.fa.tax,liqYear:2026},
+    gw:{base:CONFIG.assets.gw.base,currency:'INR',coa:CONFIG.assets.gw.coa,tax:CONFIG.assets.gw.tax,liqYear:2026},
+    prop:{base:CONFIG.assets.prop.base,currency:'INR',coa:CONFIG.assets.prop.coa,tax:CONFIG.assets.prop.tax,liqYear:2027},
+    absli:{base:CONFIG.assets.absli.base,currency:'INR',coa:CONFIG.assets.absli.coa,tax:CONFIG.assets.absli.tax,liqYear:2031},
+    grat:{base:CONFIG.assets.grat.base,currency:'INR',coa:CONFIG.assets.grat.coa,tax:CONFIG.assets.grat.tax,liqYear:2032},
+    msr:{base:CONFIG.assets.msr.base,currency:'SGD',coa:CONFIG.assets.msr.coa,tax:CONFIG.assets.msr.tax,liqYear:2029},
     eq:{base:131000,currency:'SGD',coa:0,tax:0,liqYear:2026},
     sgdc:{base:70000,currency:'SGD',coa:0,tax:0,liqYear:2026},
     inrc:{base:1700000,currency:'INR',coa:0,tax:0,liqYear:2026},
@@ -1317,11 +1370,34 @@ function generateAmortizationSchedule(principal, rateAnnual, tenureMonths, emiSt
   return schedule;
 }
 
-// How many months of salary/RSU in a given year based on end date
+// How many months of salary/RSU in a given year based on start and end dates
 function emplMonthsInYear(yr, p){
   if(!p.emplOn) return 0;
-  if(yr < p.emplEndYr) return 12;
+  const startYr = 2026;
+  const startMo = 6; // June 2026
+
+  // Before employment starts
+  if(yr < startYr) return 0;
+
+  // Employment starts in 2026
+  if(yr === startYr) {
+    if(yr < p.emplEndYr) {
+      // Employment ends after this year
+      return 12 - startMo + 1; // June-Dec = 7 months
+    } else if(yr === p.emplEndYr) {
+      // Employment ends in same year (June 2026 - end date)
+      if(p.emplEndMo < startMo) return 0;
+      return p.emplEndMo - startMo + 1;
+    }
+  }
+
+  // Middle years (between start and end)
+  if(yr > startYr && yr < p.emplEndYr) return 12;
+
+  // Year employment ends
   if(yr === p.emplEndYr) return p.emplEndMo; // full months up to and including end month
+
+  // After employment ends
   return 0;
 }
 // RSU vesting: count tranches from both current and projected schedules
@@ -2079,9 +2155,9 @@ function update(){
   renderYrTbl('rai-tbl',raiRows,RAI_YRS,'rai');
   renderYrTbl('neil-tbl',neilRows,NEIL_YRS,'neil');
 
-  // Render Assets tab (editable table + liquidity breakdown)
+  // Render Assets tab (editable table)
   renderAssetTable();
-  renderAssetSummary();
+  // renderAssetSummary(); // Removed: Asset Liquidity Breakdown table
 
   // Render Income tab (handles both current and projected RSU)
   renderSalarySection(p);
